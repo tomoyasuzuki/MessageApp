@@ -7,69 +7,59 @@
 //
 
 import UIKit
+import Foundation
 import Firebase
 import SVProgressHUD
+
+protocol LoginViewControllerProtocol {
+    func showError(_ :AuthError) -> Void
+    func showSuccess() -> Void
+    func navigateToChats() -> Void
+    func navigateToUserProfile() -> Void
+}
 
 class LoginViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var repeatedPasswordTextField: UITextField!
     
-    private var db = Firestore.firestore()
-    private var ref: CollectionReference?
+    private var presenter = LoginPresenter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        ref = db.collection("users")
+        presenter.view = self
     }
     
-    
     @IBAction func signupButtonTapped(_ sender: Any) {
-        if let email = emailTextField.text, let password = passwordTextField.text, let repeatedPassword = repeatedPasswordTextField.text {
-            if !email.isEmpty, !password.isEmpty, !repeatedPassword.isEmpty, password == repeatedPassword {
-                Auth.auth().createUser(withEmail: email, password: password) { (_, error) in
-                    if error != nil {
-                        SVProgressHUD.showError(withStatus: "SingUp Error: \(error!.localizedDescription)")
-                        SVProgressHUD.dismiss(withDelay: 1.0)
-                        return
-                    } else {
-                        SVProgressHUD.showSuccess(withStatus: "Success!")
-                        SVProgressHUD.dismiss(withDelay: 1.0)
-                    }
-                    self.performSegue(withIdentifier: "navigateToUserProfile", sender: nil)
-                }
-            }
-        }
+        presenter.signUp(email: emailTextField.text,
+                         password: passwordTextField.text,
+                         repeatedPassword: repeatedPasswordTextField.text)
     }
     
     @IBAction func singInButtonTapped(_ sender: Any) {
-        if let email = emailTextField.text, let password = passwordTextField.text, let repeatedPassword = repeatedPasswordTextField.text {
-            if !email.isEmpty, !password.isEmpty, !repeatedPassword.isEmpty, password == repeatedPassword {
-                Auth.auth().signIn(withEmail: email, password: password) { [weak self] (result, error) in
-                    guard let self = self else { return }
-                    
-                    if error != nil {
-                        SVProgressHUD.showError(withStatus: "SignIn Error")
-                        return
-                    } else {
-                        SVProgressHUD.showSuccess(withStatus: "Success!")
-                        self.createUserDocument()
-                        self.performSegue(withIdentifier: "navigateToChatsFromLogin", sender: nil)
-                    }
-                }
-            } else {
-                SVProgressHUD.showError(withStatus: "Please FillOut Form.")
-            }
-        } else {
-            SVProgressHUD.showError(withStatus: "Please FillOut Form.")
-        }
+        presenter.login(email: emailTextField.text,
+                        password: passwordTextField.text,
+                        repeatedPassword: repeatedPasswordTextField.text)
     }
 }
 
-extension LoginViewController {
-    func createUserDocument(){
-        guard let  user = Auth.auth().currentUser else { return }
-        ref?.document(user.uid).setData(["name": user.displayName, "belongs":[]])
+extension LoginViewController: LoginViewControllerProtocol {    
+    func showError(_ authError: AuthError) {
+        SVProgressHUD.showError(withStatus: "Error: \(authError.errorText())")
+        SVProgressHUD.dismiss(withDelay: 1.0)
+    }
+    
+    func showSuccess() {
+        SVProgressHUD.showSuccess(withStatus: "Success!")
+        SVProgressHUD.dismiss(withDelay: 1.0)
+    }
+    
+    func navigateToChats() {
+        self.performSegue(withIdentifier: "navigateToChatsFromLogin", sender: nil)
+    }
+    
+    func navigateToUserProfile() {
+        self.performSegue(withIdentifier: "navigateToUserProfile", sender: nil)
     }
 }
 

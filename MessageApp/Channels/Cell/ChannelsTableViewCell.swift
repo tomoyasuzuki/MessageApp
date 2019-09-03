@@ -35,13 +35,11 @@ class ChannelsTableViewCell: UITableViewCell {
         contentView.addSubview(latestMessageLabel)
         
         configureConstraints()
-        configureUIComponents()
     }
-    
 }
 
 extension ChannelsTableViewCell {
-    private func configureConstraints() {
+    func configureConstraints() {
         channelImageView.snp.makeConstraints { make in
             make.centerY.equalTo(contentView)
             make.left.equalTo(contentView).offset(16)
@@ -59,13 +57,11 @@ extension ChannelsTableViewCell {
         }
     }
     
-    private func configureUIComponents() {
-        
-    }
-    
     func configureDataSource(channel: Channel) {
         channelImageView.image = UIImage(named: "userIcon")
         channelNameLabel.text = channel.name
+        // TODO: 最新のメッセージを取得できるようにする
+        // Channelオブジェクト自体が初期化時にoptionalのlatestMessageプロパティを持っている状態にする。
         latestMessageLabel.text = "to be continue....."
     }
 }
