@@ -23,9 +23,8 @@ class ChannelsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        presenter.view = self
-        presenter.chatchChatsSnapshot()
+
+        configurePresenter()
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -58,6 +57,13 @@ extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
         navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
     }
     
+}
+
+extension ChannelsViewController {
+    private func configurePresenter() {
+        presenter.view = self
+        presenter.updateChannels()
+    }
 }
 
 extension ChannelsViewController: ChannelViewControllerProtocol {

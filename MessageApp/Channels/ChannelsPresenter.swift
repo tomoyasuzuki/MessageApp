@@ -10,13 +10,10 @@ import FirebaseFirestore
 import FirebaseAuth
 
 protocol ChannelPresenterProtocol {
-    func chatchChatsSnapshot() -> Void
-    func handleDocumentChanged(change: DocumentChange) -> Void
-    func insertNewChannel(_ channel: Channel) -> Void
-    func addUserDocument(channelName: String) -> Void
+    func updateChannels() -> Void
 }
 
-final class ChannelPresenter: ChannelPresenterProtocol {
+final class ChannelPresenter {
     var view: ChannelViewControllerProtocol? = nil
     
     private let ref = Firestore.firestore().collection("channels")
@@ -24,25 +21,12 @@ final class ChannelPresenter: ChannelPresenterProtocol {
     
     var channels: [Channel] = []
     
-    func chatchChatsSnapshot() {
-        guard  let user = user else { return }
-        
-        Firestore.firestore()
-            .collection("channels")
-            .whereField("members", arrayContains: user.uid)
-            .addSnapshotListener { (querySnapshot, error) in
-                if querySnapshot == nil || error != nil {
-                    print("snapshot update error: \(error!.localizedDescription)")
-                    return
-                }
-                
-                querySnapshot?.documentChanges.forEach { change in
-                    self.handleDocumentChanged(change: change)
-                }
-        }
+    func addUserDocument(channelName: String) {
+        guard let user = user else { return }
+        self.ref.addDocument(data: ["name": channelName, "members": [user.uid]])
     }
     
-    func handleDocumentChanged(change: DocumentChange) {
+    func handleDocumentChanged(_ change: DocumentChange) {
         guard let channel = Channel(change.document) else { return }
         
         switch change.type {
@@ -57,9 +41,24 @@ final class ChannelPresenter: ChannelPresenterProtocol {
         channels.append(channel)
         self.view?.reloadData()
     }
-    
-    func addUserDocument(channelName: String) {
-        guard let user = user else { return }
-        self.ref.addDocument(data: ["name": channelName, "members": [user.uid]])
+}
+
+extension ChannelPresenter: ChannelPresenterProtocol {
+    func updateChannels() {
+        guard  let user = user else { return }
+        
+        Firestore.firestore()
+            .collection("channels")
+            .whereField("members", arrayContains: user.uid)
+            .addSnapshotListener { (querySnapshot, error) in
+                if querySnapshot == nil || error != nil {
+                    print("channels update error: \(error!.localizedDescription)")
+                    return
+                }
+                
+                querySnapshot?.documentChanges.forEach { change in
+                    self.handleDocumentChanged(change)
+                }
+        }
     }
 }

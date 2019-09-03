@@ -26,8 +26,7 @@ class UserProfileViewController: UIViewController {
  
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter.view = self
-        
+        configurePresenter()
     }
     
     @IBAction func nextButtonTapped(_ sender: Any) {
@@ -36,6 +35,12 @@ class UserProfileViewController: UIViewController {
         } else {
             return
         }
+    }
+}
+
+extension UserProfileViewController {
+    private func configurePresenter() {
+        presenter.view = self
     }
 }
 

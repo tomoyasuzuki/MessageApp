@@ -27,7 +27,7 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter.view = self
+        configurePresenter()
     }
     
     @IBAction func signupButtonTapped(_ sender: Any) {
@@ -40,6 +40,12 @@ class LoginViewController: UIViewController {
         presenter.login(email: emailTextField.text,
                         password: passwordTextField.text,
                         repeatedPassword: repeatedPasswordTextField.text)
+    }
+}
+
+extension LoginViewController {
+    private func configurePresenter() {
+        presenter.view = self
     }
 }
 
