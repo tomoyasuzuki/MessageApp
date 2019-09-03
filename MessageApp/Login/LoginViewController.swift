@@ -11,15 +11,23 @@ import Foundation
 import Firebase
 import SVProgressHUD
 
+protocol LoginViewControllerProtocol {
+    func showError(_ :AuthError) -> Void
+    func showSuccess() -> Void
+    func navigateToChats() -> Void
+    func navigateToUserProfile() -> Void
+}
+
 class LoginViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var repeatedPasswordTextField: UITextField!
     
-    private lazy var presenter = LoginPresenter()
+    private var presenter = LoginPresenter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter.view = self
     }
     
     @IBAction func signupButtonTapped(_ sender: Any) {
@@ -35,7 +43,7 @@ class LoginViewController: UIViewController {
     }
 }
 
-extension LoginViewController {    
+extension LoginViewController: LoginViewControllerProtocol {    
     func showError(_ authError: AuthError) {
         SVProgressHUD.showError(withStatus: "Error: \(authError.errorText())")
         SVProgressHUD.dismiss(withDelay: 1.0)

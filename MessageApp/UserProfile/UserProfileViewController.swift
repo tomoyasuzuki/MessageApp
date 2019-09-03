@@ -16,7 +16,7 @@ class UserProfileViewController: UIViewController {
     @IBOutlet weak var nameTitleLabel: UILabel!
     @IBOutlet weak var nameTextField: UITextField!
     
-    private lazy var presenter = UserProfilePresenter()
+    private var presenter = UserProfilePresenter()
  
     override func viewDidLoad() {
         super.viewDidLoad()

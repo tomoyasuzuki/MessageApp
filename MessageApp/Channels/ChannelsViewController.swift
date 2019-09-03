@@ -9,15 +9,22 @@
 import UIKit
 import Firebase
 
+
+protocol ChannelViewControllerProtocol {
+    func showAlert() -> Void
+    func reloadData() -> Void
+}
+
 class ChannelsViewController: UIViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
 
-    private lazy var presenter = ChannelPresenter()
+    private var presenter = ChannelPresenter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        presenter.view = self
         presenter.chatchChatsSnapshot()
         
         tableView.delegate = self
@@ -47,14 +54,13 @@ extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id
-            , name: presenter.channels[indexPath.row].name), animated: true)
+        // ここで渡すのはuser情報ではなくchannel情報
+        navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
     }
     
 }
 
-
-extension ChannelsViewController {
+extension ChannelsViewController: ChannelViewControllerProtocol {
     func showAlert() {
         let alert = UIAlertController(title: "Lets Create Channel!!", message: "please enter your Channel Name.", preferredStyle: .alert)
         
@@ -73,7 +79,7 @@ extension ChannelsViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    func reloadTable() {
+    func reloadData() {
         tableView.reloadData()
     }
 }

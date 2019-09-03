@@ -10,6 +10,7 @@
 		5720A112231BFD6500512154 /* UserProfilePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5720A111231BFD6400512154 /* UserProfilePresenter.swift */; };
 		5720A114231BFFB500512154 /* UpdateUserProfileError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5720A113231BFFB500512154 /* UpdateUserProfileError.swift */; };
 		5720A118231C02A900512154 /* ChannelsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5720A117231C02A900512154 /* ChannelsPresenter.swift */; };
+		5720A11A231CE5B700512154 /* ChatRoomPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5720A119231CE5B700512154 /* ChatRoomPresenter.swift */; };
 		57229F182317FDB9006E9150 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F172317FDB9006E9150 /* UserProfileViewController.swift */; };
 		57229F1B231A3512006E9150 /* ChannelsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F1A231A3512006E9150 /* ChannelsTableViewCell.swift */; };
 		57229F1D231A598B006E9150 /* Sender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F1C231A598B006E9150 /* Sender.swift */; };
@@ -34,6 +35,7 @@
 		5720A111231BFD6400512154 /* UserProfilePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfilePresenter.swift; sourceTree = "<group>"; };
 		5720A113231BFFB500512154 /* UpdateUserProfileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserProfileError.swift; sourceTree = "<group>"; };
 		5720A117231C02A900512154 /* ChannelsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelsPresenter.swift; sourceTree = "<group>"; };
+		5720A119231CE5B700512154 /* ChatRoomPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomPresenter.swift; sourceTree = "<group>"; };
 		57229F172317FDB9006E9150 /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		57229F1A231A3512006E9150 /* ChannelsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelsTableViewCell.swift; sourceTree = "<group>"; };
 		57229F1C231A598B006E9150 /* Sender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sender.swift; sourceTree = "<group>"; };
@@ -84,6 +86,21 @@
 			path = Error;
 			sourceTree = "<group>";
 		};
+		5720A11D231E141B00512154 /* Resourses */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resourses;
+			sourceTree = "<group>";
+		};
+		5720A11E231E180400512154 /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				57229F1A231A3512006E9150 /* ChannelsTableViewCell.swift */,
+			);
+			path = Cell;
+			sourceTree = "<group>";
+		};
 		57229F1323179131006E9150 /* Login */ = {
 			isa = PBXGroup;
 			children = (
@@ -94,20 +111,21 @@
 			path = Login;
 			sourceTree = "<group>";
 		};
-		57229F142317914E006E9150 /* Chats */ = {
+		57229F142317914E006E9150 /* Channels */ = {
 			isa = PBXGroup;
 			children = (
 				5729EAB623162C60001FB1C9 /* ChannelsViewController.swift */,
 				5720A117231C02A900512154 /* ChannelsPresenter.swift */,
-				57229F1A231A3512006E9150 /* ChannelsTableViewCell.swift */,
+				5720A11E231E180400512154 /* Cell */,
 			);
-			path = Chats;
+			path = Channels;
 			sourceTree = "<group>";
 		};
 		57229F1523179175006E9150 /* ChatRoom */ = {
 			isa = PBXGroup;
 			children = (
 				57E72FFF23166ED70010A16D /* ChatRoomViewController.swift */,
+				5720A119231CE5B700512154 /* ChatRoomPresenter.swift */,
 			);
 			path = ChatRoom;
 			sourceTree = "<group>";
@@ -156,9 +174,10 @@
 				5729EA9B231589E5001FB1C9 /* AppDelegate.swift */,
 				57229F1323179131006E9150 /* Login */,
 				57229F192317FDBE006E9150 /* UserProfile */,
-				57229F142317914E006E9150 /* Chats */,
+				57229F142317914E006E9150 /* Channels */,
 				57229F1523179175006E9150 /* ChatRoom */,
 				57229F1623179194006E9150 /* Model */,
+				5720A11D231E141B00512154 /* Resourses */,
 				5729EA9F231589E5001FB1C9 /* Main.storyboard */,
 				5729EAA5231589E9001FB1C9 /* Assets.xcassets */,
 				5729EAA7231589E9001FB1C9 /* LaunchScreen.storyboard */,
@@ -309,6 +328,7 @@
 				57E730082316751B0010A16D /* Message.swift in Sources */,
 				5729EAA4231589E5001FB1C9 /* MessageApp.xcdatamodeld in Sources */,
 				5720A118231C02A900512154 /* ChannelsPresenter.swift in Sources */,
+				5720A11A231CE5B700512154 /* ChatRoomPresenter.swift in Sources */,
 				57229F1D231A598B006E9150 /* Sender.swift in Sources */,
 				5729EA9C231589E5001FB1C9 /* AppDelegate.swift in Sources */,
 				5720A112231BFD6500512154 /* UserProfilePresenter.swift in Sources */,

@@ -15,8 +15,9 @@ protocol ChannelPresenterProtocol {
     func insertNewChannel(_ channel: Channel) -> Void
     func addUserDocument(channelName: String) -> Void
 }
+
 final class ChannelPresenter: ChannelPresenterProtocol {
-    private lazy var view = ChannelsViewController()
+    var view: ChannelViewControllerProtocol? = nil
     
     private let ref = Firestore.firestore().collection("channels")
     private let user = Auth.auth().currentUser
@@ -54,7 +55,7 @@ final class ChannelPresenter: ChannelPresenterProtocol {
     
     func insertNewChannel(_ channel: Channel) {
         channels.append(channel)
-        self.view.reloadTable()
+        self.view?.reloadData()
     }
     
     func addUserDocument(channelName: String) {

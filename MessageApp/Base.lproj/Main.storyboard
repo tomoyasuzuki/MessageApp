@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="geW-tl-dyI">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -65,7 +65,7 @@
                         <outlet property="nameTextField" destination="0Rz-3y-SDW" id="c9Z-Ya-LTy"/>
                         <outlet property="nameTitleLabel" destination="NPV-sV-xQZ" id="3OE-Vt-LLh"/>
                         <outlet property="userProfileImageView" destination="Zhf-HS-OIK" id="fNw-M5-vg1"/>
-                        <segue destination="geW-tl-dyI" kind="show" id="cNb-oE-rbq"/>
+                        <segue destination="dli-m9-Eiu" kind="show" id="cNb-oE-rbq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eGz-uT-b16" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -141,7 +141,7 @@
                         <outlet property="emailTextField" destination="0ph-hw-brw" id="H9A-rt-8Z0"/>
                         <outlet property="passwordTextField" destination="xWP-04-3VO" id="Oyk-kE-JGG"/>
                         <outlet property="repeatedPasswordTextField" destination="0Vm-Z4-A7k" id="cqt-Hw-Ira"/>
-                        <segue destination="geW-tl-dyI" kind="show" identifier="navigateToChatsFromLogin" id="Np8-Wu-zDd"/>
+                        <segue destination="dli-m9-Eiu" kind="show" identifier="navigateToChatsFromLogin" id="Np8-Wu-zDd"/>
                         <segue destination="DYR-O1-FRP" kind="show" identifier="navigateToUserProfile" id="gYk-tA-VTp"/>
                     </connections>
                 </viewController>
@@ -208,12 +208,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rax-Aj-03m" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2068" y="2"/>
+            <point key="canvasLocation" x="3007.1999999999998" y="1.3493253373313345"/>
         </scene>
         <!--Chat Room View Controller-->
         <scene sceneID="D1J-QX-GGM">
             <objects>
-                <viewController id="FIy-69-lh9" customClass="ChatRoomViewController" customModule="MessageApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="Chatroom" useStoryboardIdentifierAsRestorationIdentifier="YES" id="FIy-69-lh9" customClass="ChatRoomViewController" customModule="MessageApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="9YY-iq-VaD">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -223,13 +223,31 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="I41-CY-Jib" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2924" y="1"/>
+            <point key="canvasLocation" x="3863.1999999999998" y="0.44977511244377816"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Q4L-lK-juj">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="dli-m9-Eiu" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="8AK-dB-v6V">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="geW-tl-dyI" kind="relationship" relationship="rootViewController" id="xbL-jW-7wQ"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6Zk-mC-3dQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2068" y="1.3493253373313345"/>
         </scene>
     </scenes>
     <resources>
         <image name="userIcon" width="300" height="300"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Np8-Wu-zDd"/>
+        <segue reference="cNb-oE-rbq"/>
     </inferredMetricsTieBreakers>
 </document>

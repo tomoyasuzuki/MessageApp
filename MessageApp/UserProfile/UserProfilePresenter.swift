@@ -14,7 +14,7 @@ protocol UserProfileProtocol {
 }
 
 final class UserProfilePresenter: UserProfileProtocol {
-    private lazy var view = UserProfileViewController()
+    var view = UserProfileViewController()
     
     func setUserDisplayName(name: String) {
         guard let user = Auth.auth().currentUser else { return }
@@ -29,9 +29,9 @@ final class UserProfilePresenter: UserProfileProtocol {
         request.commitChanges { [weak self] error in
             guard let self = self else { return }
             
-            if let error = error {
+            if error != nil {
                 self.view.showError(UpdateUserProfileError.unexpected)
-                // DEBUG: print(error.localizedDescription)
+                // DEBUG: print(error!.localizedDescription)
             }
             self.view.navigateToChats()
         }

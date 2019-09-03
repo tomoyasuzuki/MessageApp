@@ -19,7 +19,8 @@ protocol LoginPresenterProtocol {
 }
 
 class LoginPresenter: LoginPresenterProtocol {
-    private lazy var view = LoginViewController()
+    var view: LoginViewControllerProtocol? = nil
+    
     private let ref = Firestore.firestore().collection("users")
     
     func signUp(email: String?, password: String?, repeatedPassword: String?) {
@@ -30,24 +31,24 @@ class LoginPresenter: LoginPresenterProtocol {
                 
                 if error != nil {
                     if !email.contains("@") || !email.contains(".") {
-                        self.view.showError(AuthError.invalidEmail)
+                        self.view?.showError(AuthError.invalidEmail)
                     } else if password.count < 6 {
-                        self.view.showError(AuthError.passwordIsLessThanSix)
+                        self.view?.showError(AuthError.passwordIsLessThanSix)
                     } else if repeatedPassword != password {
-                        self.view.showError(AuthError.repeatedPasswordIsNotEqualToPassword)
+                        self.view?.showError(AuthError.repeatedPasswordIsNotEqualToPassword)
                     } else {
-                        self.view.showError(AuthError.unexpected)
+                        self.view?.showError(AuthError.unexpected)
                     }
                     
                     return
                 }
                 
                 self.createUser()
-                self.view.showSuccess()
-                self.view.navigateToUserProfile()
+                self.view?.showSuccess()
+                self.view?.navigateToUserProfile()
             }
         } else {
-            self.view.showError(AuthError.notFilledOut)
+            self.view?.showError(AuthError.notFilledOut)
         }
     }
     
@@ -58,20 +59,20 @@ class LoginPresenter: LoginPresenterProtocol {
                 guard let self = self else { return }
                 
                 if error != nil {
-                    self.view.showError(AuthError.userIsNotExits)
+                    self.view?.showError(AuthError.userIsNotExits)
                     return
                 }
                 
-                self.view.showSuccess()
-                self.view.navigateToChats()
+                self.view?.showSuccess()
+                self.view?.navigateToChats()
             }
         } else {
-            self.view.showError(AuthError.notFilledOut)
+            self.view?.showError(AuthError.notFilledOut)
         }
     }
     
     func createUser() {
         guard let  user = Auth.auth().currentUser else { return }
-        ref.document(user.uid).setData(["name": user.displayName, "belongs":[]])
+        ref.document(user.uid).setData(["name": user.displayName ?? "unknown", "belongs":[]])
     }
 }
