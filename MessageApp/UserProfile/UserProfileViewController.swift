@@ -10,6 +10,12 @@ import UIKit
 import Firebase
 import SVProgressHUD
 
+protocol UserProfileViewControllerProtocol {
+    func showError(_ updateUserProfileError: UpdateUserProfileError) -> Void
+    func showSuccess() -> Void
+    func navigateToChats() -> Void
+}
+
 class UserProfileViewController: UIViewController {
     @IBOutlet weak var userProfileImageView: UIImageView!
     @IBOutlet weak var imageEditButton: UIButton!
@@ -20,6 +26,7 @@ class UserProfileViewController: UIViewController {
  
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter.view = self
         
     }
     
@@ -32,7 +39,7 @@ class UserProfileViewController: UIViewController {
     }
 }
 
-extension UserProfileViewController {
+extension UserProfileViewController: UserProfileViewControllerProtocol {
     func showError(_ updateUserProfileError: UpdateUserProfileError) {
         SVProgressHUD.showError(withStatus: "Error: \(updateUserProfileError.errorText())")
         SVProgressHUD.dismiss(withDelay: 1.0)
