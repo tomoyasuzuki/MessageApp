@@ -65,7 +65,7 @@
                         <outlet property="nameTextField" destination="0Rz-3y-SDW" id="c9Z-Ya-LTy"/>
                         <outlet property="nameTitleLabel" destination="NPV-sV-xQZ" id="3OE-Vt-LLh"/>
                         <outlet property="userProfileImageView" destination="Zhf-HS-OIK" id="fNw-M5-vg1"/>
-                        <segue destination="dli-m9-Eiu" kind="show" id="cNb-oE-rbq"/>
+                        <segue destination="dli-m9-Eiu" kind="show" identifier="navigateToChatsFromSignUp" id="cNb-oE-rbq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eGz-uT-b16" userLabel="First Responder" sceneMemberID="firstResponder"/>

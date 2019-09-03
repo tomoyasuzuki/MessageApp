@@ -9,17 +9,17 @@
 import FirebaseFirestore
 import FirebaseAuth
 
-protocol UserProfileProtocol {
+protocol UserProfilePresenterProtocol {
     func setUserDisplayName(name: String) -> Void
 }
 
-final class UserProfilePresenter: UserProfileProtocol {
-    var view = UserProfileViewController()
+final class UserProfilePresenter: UserProfilePresenterProtocol {
+    var view: UserProfileViewControllerProtocol? = nil
     
     func setUserDisplayName(name: String) {
         guard let user = Auth.auth().currentUser else { return }
         if name.contains("@") || name.contains(".") {
-            self.view.showError(UpdateUserProfileError.userNameIsInvalid)
+            self.view?.showError(UpdateUserProfileError.userNameIsInvalid)
             return
         }
         
@@ -30,10 +30,10 @@ final class UserProfilePresenter: UserProfileProtocol {
             guard let self = self else { return }
             
             if error != nil {
-                self.view.showError(UpdateUserProfileError.unexpected)
+                self.view?.showError(UpdateUserProfileError.unexpected)
                 // DEBUG: print(error!.localizedDescription)
             }
-            self.view.navigateToChats()
+            self.view?.navigateToChats()
         }
     }
 }

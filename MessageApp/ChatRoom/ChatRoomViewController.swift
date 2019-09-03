@@ -95,18 +95,22 @@ extension ChatRoomViewController: MessagesDataSource {
 extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegate {
     func backgroundColor(for message: MessageType, at indexPath: IndexPath,
                          in messagesCollectionView: MessagesCollectionView) -> UIColor {
-        return isFromCurrentSender(message: message) ? UIColor.green : UIColor.gray
+        return isFromCurrentSender(message: message) ? .green : .white
     }
 
     func shouldDisplayHeader(for message: MessageType, at indexPath: IndexPath,
                              in messagesCollectionView: MessagesCollectionView) -> Bool {
         return false
     }
+    
+    func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+        return .black
+    }
 
     func messageStyle(for message: MessageType, at indexPath: IndexPath,
                       in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
         let corner: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
-        return .bubbleTail(corner, .curved)
+        return .bubbleTail(corner, .pointedEdge)
     }
 }
 
