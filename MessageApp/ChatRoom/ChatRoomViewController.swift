@@ -9,6 +9,9 @@
 import UIKit
 import MessageKit
 import InputBarAccessoryView
+import Photos
+import FirebaseStorage
+import FirebaseFirestore
 
 protocol ChatRoomViewControllerProtocol {
     func reloadData() -> Void
@@ -18,7 +21,7 @@ protocol ChatRoomViewControllerProtocol {
 class ChatRoomViewController: MessagesViewController {
     
     private let presenter = ChatRoomPresenter()
-    
+ 
     var id: String!
     var name: String!
     
@@ -40,12 +43,25 @@ class ChatRoomViewController: MessagesViewController {
         
         navigationItem.title = presenter.channel?.name
     }
+    
+    @objc func cameraButtonPressed() {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            picker.sourceType = .camera
+        } else {
+            picker.sourceType = .photoLibrary
+        }
+        
+        present(picker, animated: true, completion: nil)
+    }
 }
 
 
 extension ChatRoomViewController: InputBarAccessoryViewDelegate{
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-        presenter.createMessage(text)
+        presenter.saveMessage(text)
         inputBar.inputTextView.text = ""
     }
 }
@@ -64,6 +80,22 @@ extension ChatRoomViewController {
         
         messageInputBar.delegate = self
         messageInputBar.sendButton.tintColor = UIColor.green
+        
+        let cameraItem = InputBarButtonItem(type: .system)
+        cameraItem.tintColor = .black
+        cameraItem.image = UIImage(named: "imageicon_image")
+        
+        
+        cameraItem.addTarget(
+            self,
+            action: #selector(cameraButtonPressed),
+            for: .primaryActionTriggered
+        )
+        cameraItem.setSize(CGSize(width: 60, height: 30), animated: false)
+        
+        messageInputBar.leftStackView.alignment = .center
+        messageInputBar.setLeftStackViewWidthConstant(to: 50, animated: false)
+        messageInputBar.setStackViewItems([cameraItem], forStack: .left, animated: false)
     }
 }
 
@@ -111,6 +143,35 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
                       in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
         let corner: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
         return .bubbleTail(corner, .pointedEdge)
+    }
+}
+
+extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        // デフォルトの画像が選択された時に呼ばれる
+        guard let image = info[.originalImage] as? UIImage else { return }
+        self.presenter.saveImage(image) { url in
+            print(url)
+            self.presenter.saveMessage(url)
+    
+//        PHImageManager.default().requestImage(for: asset,
+//                                              targetSize: CGSize(width: 100, height: 100),
+//                                              contentMode: .aspectFit,
+//                                              options: nil) { [weak self] image, info in
+//                                                guard let self = self else { return }
+//                                                guard let image = image else { return }
+//
+//                                                self.presenter.saveImage(image, complition: { [weak self] url in
+//                                                    guard let self = self else { return }
+//                                                    // 画像URLを保持するメッセージとしてFirestoreに保存
+//                                                    self.presenter.saveMessage(url)
+//                                                })
+        
+        
+        
+        }
+
+        picker.dismiss(animated: true, completion: nil)
     }
 }
 

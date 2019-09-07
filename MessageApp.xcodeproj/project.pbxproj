@@ -16,6 +16,9 @@
 		57229F1D231A598B006E9150 /* Sender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F1C231A598B006E9150 /* Sender.swift */; };
 		57229F1F231A59FF006E9150 /* Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F1E231A59FF006E9150 /* Channel.swift */; };
 		57229F25231AB5F6006E9150 /* AuthError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57229F24231AB5F6006E9150 /* AuthError.swift */; };
+		57264D68231F4C790056DC53 /* MessageObjectType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57264D67231F4C790056DC53 /* MessageObjectType.swift */; };
+		57264D6C23228A0C0056DC53 /* ChatSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57264D6B23228A0C0056DC53 /* ChatSearchViewController.swift */; };
+		57264D6E23228A190056DC53 /* ChatSearchPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57264D6D23228A190056DC53 /* ChatSearchPresenter.swift */; };
 		5729EA9C231589E5001FB1C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5729EA9B231589E5001FB1C9 /* AppDelegate.swift */; };
 		5729EA9E231589E5001FB1C9 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5729EA9D231589E5001FB1C9 /* LoginViewController.swift */; };
 		5729EAA1231589E5001FB1C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5729EA9F231589E5001FB1C9 /* Main.storyboard */; };
@@ -41,6 +44,9 @@
 		57229F1C231A598B006E9150 /* Sender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sender.swift; sourceTree = "<group>"; };
 		57229F1E231A59FF006E9150 /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
 		57229F24231AB5F6006E9150 /* AuthError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthError.swift; sourceTree = "<group>"; };
+		57264D67231F4C790056DC53 /* MessageObjectType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageObjectType.swift; sourceTree = "<group>"; };
+		57264D6B23228A0C0056DC53 /* ChatSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSearchViewController.swift; sourceTree = "<group>"; };
+		57264D6D23228A190056DC53 /* ChatSearchPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSearchPresenter.swift; sourceTree = "<group>"; };
 		5729EA98231589E5001FB1C9 /* MessageApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MessageApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5729EA9B231589E5001FB1C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5729EA9D231589E5001FB1C9 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -126,6 +132,7 @@
 			children = (
 				57E72FFF23166ED70010A16D /* ChatRoomViewController.swift */,
 				5720A119231CE5B700512154 /* ChatRoomPresenter.swift */,
+				57264D67231F4C790056DC53 /* MessageObjectType.swift */,
 			);
 			path = ChatRoom;
 			sourceTree = "<group>";
@@ -148,6 +155,15 @@
 				5720A116231C01CB00512154 /* Error */,
 			);
 			path = UserProfile;
+			sourceTree = "<group>";
+		};
+		57264D6F23228A1E0056DC53 /* ChatSearch */ = {
+			isa = PBXGroup;
+			children = (
+				57264D6B23228A0C0056DC53 /* ChatSearchViewController.swift */,
+				57264D6D23228A190056DC53 /* ChatSearchPresenter.swift */,
+			);
+			path = ChatSearch;
 			sourceTree = "<group>";
 		};
 		5729EA8F231589E5001FB1C9 = {
@@ -176,6 +192,7 @@
 				57229F192317FDBE006E9150 /* UserProfile */,
 				57229F142317914E006E9150 /* Channels */,
 				57229F1523179175006E9150 /* ChatRoom */,
+				57264D6F23228A1E0056DC53 /* ChatSearch */,
 				57229F1623179194006E9150 /* Model */,
 				5720A11D231E141B00512154 /* Resourses */,
 				5729EA9F231589E5001FB1C9 /* Main.storyboard */,
@@ -322,9 +339,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5729EA9E231589E5001FB1C9 /* LoginViewController.swift in Sources */,
+				57264D6E23228A190056DC53 /* ChatSearchPresenter.swift in Sources */,
 				5729EAB723162C60001FB1C9 /* ChannelsViewController.swift in Sources */,
 				57229F1F231A59FF006E9150 /* Channel.swift in Sources */,
 				57229F25231AB5F6006E9150 /* AuthError.swift in Sources */,
+				57264D6C23228A0C0056DC53 /* ChatSearchViewController.swift in Sources */,
 				57E730082316751B0010A16D /* Message.swift in Sources */,
 				5729EAA4231589E5001FB1C9 /* MessageApp.xcdatamodeld in Sources */,
 				5720A118231C02A900512154 /* ChannelsPresenter.swift in Sources */,
@@ -335,6 +354,7 @@
 				57E72FFE23166A4F0010A16D /* LoginPresenter.swift in Sources */,
 				57229F1B231A3512006E9150 /* ChannelsTableViewCell.swift in Sources */,
 				57229F182317FDB9006E9150 /* UserProfileViewController.swift in Sources */,
+				57264D68231F4C790056DC53 /* MessageObjectType.swift in Sources */,
 				5720A114231BFFB500512154 /* UpdateUserProfileError.swift in Sources */,
 				57E7300023166ED70010A16D /* ChatRoomViewController.swift in Sources */,
 			);

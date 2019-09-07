@@ -8,10 +8,11 @@
 
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 protocol ChatRoomPresenterProtocol {
-    func createMessage(_ text: String) -> Void
-    func saveMessage(_ message: Message) -> Void
+    func saveMessage(_ text: String) -> Void
+    func saveMessage(_ url: URL) -> Void
     func updateMessages() -> Void
 }
 
@@ -32,16 +33,27 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
         return db.collection(["channels", channel!.id, "threads"].joined(separator: "/"))
     }
     
-    func createMessage(_ text: String) {
-        let message = Message(sender: sender, content: text)
-        saveMessage(message)
+    func saveMessage(_ text: String) {
+        ref.addDocument(data: ["senderID": sender.senderId,
+                               "senderName": sender.displayName,
+                               "sentDate": Date.timeIntervalBetween1970AndReferenceDate,
+                               "content": text,
+                               "imageURL": ""]) { [weak self] error in
+                                guard let self = self else { return }
+                                if error != nil {
+                                    //print("error: \(error!.localizedDescription)")
+                                    return
+                                }
+                                self.view?.scrollToBottom()
+        }
     }
     
-    func saveMessage(_ message: Message) {
-        ref.addDocument(data: ["senderID": message.sender.senderId,
-                               "senderName": message.sender.displayName,
-                               "sentDate": message.sentDate,
-                               "content": message.content]) { [weak self] error in
+    func saveMessage(_ url: URL) {
+        ref.addDocument(data: ["senderID": sender.senderId,
+                               "senderName": sender.displayName,
+                               "sentDate": Date.timeIntervalBetween1970AndReferenceDate,
+                               "content": "",
+                               "imageURL": url.absoluteString]) { [weak self] error in
                                 guard let self = self else { return }
                                 if error != nil {
                                     //print("error: \(error!.localizedDescription)")
@@ -68,11 +80,97 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
     func handleDocumentChange(_ change: DocumentChange) {
         switch change.type {
         case .added:
-            guard let message = Message(document: change.document) else { return }
-            self.messages.append(message)
+            self.judgeMessageType(change: change) { result in
+                switch result {
+                case .text:
+                    let message = Message(text: change.document.data()["content"] as! String,
+                                          sender: sender,
+                                          messageId: "",
+                                          sentDate: Date())
+                    self.messages.append(message)
+                case .photo:
+                    guard let url = (change.document.data()["imageURL"] as! String).toURL() else { return }
+                    print(url)
+                    let message = Message(image: getImage(url: url),
+                                          sender: sender,
+                                          messageId: "",
+                                          sentDate: Date())
+                    
+                    self.messages.append(message)
+                    
+                default:
+                    break
+                }
+            }
             self.view?.reloadData()
         default:
             break
         }
+    }
+    
+    func judgeMessageType(change: DocumentChange, complition: (MessageObjectType) -> ()) {
+        print("judgeMessageType")
+        let document = change.document
+        
+        if document.data()["content"] as? String != "" {
+           complition(.text)
+        } else if document.data()["imageURL"] as? String != "" {
+           complition(.photo)
+        }
+    }
+}
+
+// MARK: Image Helpers
+
+extension ChatRoomPresenter {
+    func saveImage(_ image: UIImage, complition: @escaping (URL) -> ()) {
+        guard let data = image.jpegData(compressionQuality: 0.5) else { return }
+        let metaData = StorageMetadata()
+        metaData.contentType = "image/jpeg"
+        
+        let ref = Storage.storage()
+            .reference(withPath: "image")
+            .child([UUID().uuidString, "\(Date().timeIntervalSince1970)"].joined(separator: "/"))
+        
+        ref.putData(data, metadata: metaData) { (metaData, error) in
+            if error != nil {
+                return
+            }
+            
+            ref.downloadURL { (url, error) in
+                print(url)
+                // この時点でURLの頭が http:/firebase....という不自然な形をしています
+                guard let url = url else { return }
+                if error != nil {
+                    return
+                }
+                
+                complition(url)
+            }
+        }
+    }
+    
+    func getImage(url: URL) -> UIImage {
+        let ref = Storage.storage().reference(forURL: "https://firebasestorage.googleapis.com/v0/b/messageapp-ba61a.appspot.com/o/image%2F705215B9-27E7-4DB4-8C42-63CE73CFDF32%2F1567562962.604121?alt=media&token=d55cdba7-77d9-4451-be05-f5c23da6e773")
+        var image: UIImage!
+        
+        ref.getData(maxSize: 1 * 1024 * 1024) { (data, error) in
+            guard let data = data else { return }
+            print("data not nil")
+            if error != nil {
+                print(error!.localizedDescription)
+                return
+            }
+            
+            image = UIImage(data: data)
+        }
+        
+        return image
+    }
+}
+
+extension String {
+    func toURL() -> URL? {
+        return URL(fileURLWithPath: self)
     }
 }
