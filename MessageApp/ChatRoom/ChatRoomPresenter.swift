@@ -151,7 +151,7 @@ extension ChatRoomPresenter {
     }
     
     func getImage(url: URL) -> UIImage {
-        let ref = Storage.storage().reference(forURL: "https://firebasestorage.googleapis.com/v0/b/messageapp-ba61a.appspot.com/o/image%2F705215B9-27E7-4DB4-8C42-63CE73CFDF32%2F1567562962.604121?alt=media&token=d55cdba7-77d9-4451-be05-f5c23da6e773")
+        let ref = Storage.storage().reference(forURL:url.absoluteString)
         var image: UIImage!
         
         ref.getData(maxSize: 1 * 1024 * 1024) { (data, error) in
