@@ -66,8 +66,6 @@ extension ChatSearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(presenter.channels[indexPath.row].id,presenter.channels[indexPath.row].name)
         navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
-            
-        print("selected")
     }
 }
 

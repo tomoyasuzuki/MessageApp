@@ -80,7 +80,8 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
     func handleDocumentChange(_ change: DocumentChange) {
         switch change.type {
         case .added:
-            self.judgeMessageType(change: change) { result in
+            self.judgeMessageType(change: change) { [weak self] result in
+                guard let self = self else { return }
                 switch result {
                 case .text:
                     let message = Message(text: change.document.data()["content"] as! String,
@@ -90,14 +91,14 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
                     self.messages.append(message)
                 case .photo:
                     guard let url = (change.document.data()["imageURL"] as! String).toURL() else { return }
-                    print(url)
-                    let message = Message(image: getImage(url: url),
-                                          sender: sender,
-                                          messageId: "",
-                                          sentDate: Date())
-                    
-                    self.messages.append(message)
-                    
+                    getImage(url: url, complition: { image in
+                        let message = Message(image: image,
+                                              sender: self.sender,
+                                              messageId: "",
+                                              sentDate: Date())
+                        
+                        self.messages.append(message)
+                    })
                 default:
                     break
                 }
@@ -109,7 +110,6 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
     }
     
     func judgeMessageType(change: DocumentChange, complition: (MessageObjectType) -> ()) {
-        print("judgeMessageType")
         let document = change.document
         
         if document.data()["content"] as? String != "" {
@@ -138,7 +138,6 @@ extension ChatRoomPresenter {
             }
             
             ref.downloadURL { (url, error) in
-                print(url)
                 // この時点でURLの頭が http:/firebase....という不自然な形をしています
                 guard let url = url else { return }
                 if error != nil {
@@ -150,27 +149,23 @@ extension ChatRoomPresenter {
         }
     }
     
-    func getImage(url: URL) -> UIImage {
+    func getImage(url: URL, complition: @escaping(UIImage) -> ()) {
         let ref = Storage.storage().reference(forURL:url.absoluteString)
-        var image: UIImage!
         
         ref.getData(maxSize: 1 * 1024 * 1024) { (data, error) in
             guard let data = data else { return }
-            print("data not nil")
             if error != nil {
                 print(error!.localizedDescription)
                 return
             }
             
-            image = UIImage(data: data)
+            complition(UIImage(data: data)!)
         }
-        
-        return image
     }
 }
 
 extension String {
     func toURL() -> URL? {
-        return URL(fileURLWithPath: self)
+        return URL(string: self)
     }
 }

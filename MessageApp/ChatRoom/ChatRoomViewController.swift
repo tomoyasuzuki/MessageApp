@@ -78,6 +78,9 @@ extension ChatRoomViewController {
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
         
+//        scrollsToBottomOnKeyboardBeginsEditing = true
+//        maintainPositionOnKeyboardFrameChanged = true
+        
         messageInputBar.delegate = self
         messageInputBar.sendButton.tintColor = UIColor.green
         
@@ -141,8 +144,11 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
 
     func messageStyle(for message: MessageType, at indexPath: IndexPath,
                       in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
-        let corner: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
-        return .bubbleTail(corner, .pointedEdge)
+        return .bubble
+    }
+    
+    func configureMediaMessageImageView(_ imageView: UIImageView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+        imageView.adjustsImageSizeForAccessibilityContentSizeCategory = true
     }
 }
 
