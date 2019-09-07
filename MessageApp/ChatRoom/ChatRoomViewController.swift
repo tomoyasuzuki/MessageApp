@@ -154,28 +154,28 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
 
 extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        // デフォルトの画像が選択された時に呼ばれる
-        guard let image = info[.originalImage] as? UIImage else { return }
-        self.presenter.saveImage(image) { url in
-            print(url)
-            self.presenter.saveMessage(url)
-    
-//        PHImageManager.default().requestImage(for: asset,
-//                                              targetSize: CGSize(width: 100, height: 100),
-//                                              contentMode: .aspectFit,
-//                                              options: nil) { [weak self] image, info in
-//                                                guard let self = self else { return }
-//                                                guard let image = image else { return }
-//
-//                                                self.presenter.saveImage(image, complition: { [weak self] url in
-//                                                    guard let self = self else { return }
-//                                                    // 画像URLを保持するメッセージとしてFirestoreに保存
-//                                                    self.presenter.saveMessage(url)
-//                                                })
-        
-        
-        
-        }
+            
+            if let asset = info[.phAsset] as? PHAsset {
+                PHImageManager.default().requestImage(for: asset,
+                                                      targetSize: CGSize(width: 100, height: 100),
+                                                      contentMode: .aspectFit,
+                                                      options: nil) { [weak self] image, info in
+                                                        guard let self = self else { return }
+                                                        guard let image = image else { return }
+                                                        
+                                                        self.presenter.saveImage(image, complition: { [weak self] url in
+                                                            guard let self = self else { return }
+                                                            self.presenter.saveMessage(url)
+                                                        }
+                                                    )
+                                                }
+                
+            } else if let image = info[.originalImage] as? UIImage {
+                self.presenter.saveImage(image) { [weak self] url in
+                    guard let self = self else { return }
+                    self.presenter.saveMessage(url)
+                }
+            }
 
         picker.dismiss(animated: true, completion: nil)
     }
