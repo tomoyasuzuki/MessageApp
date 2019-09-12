@@ -13,6 +13,7 @@ import FirebaseStorage
 protocol ChatRoomPresenterProtocol {
     func saveMessage(_ text: String) -> Void
     func saveMessage(_ url: URL) -> Void
+    func saveAudioMessage(_ audioURL: URL) -> Void
     func updateMessages() -> Void
 }
 
@@ -63,6 +64,23 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
         }
     }
     
+    func saveAudioMessage(_ audioURL: URL) {
+        print("audio called")
+        ref.addDocument(data: ["senderID": sender.senderId,
+                                    "senderName": sender.displayName,
+                                    "sentDate": Date.timeIntervalBetween1970AndReferenceDate,
+                                    "content": "",
+                                    "imageURL": "",
+                                    "audioURL": audioURL.description]) { [weak self] error in
+                                        guard let self = self else { return }
+                                        if error != nil {
+                                            print("error: \(error!.localizedDescription)")
+                                            return
+                                        }
+                                        self.view?.scrollToBottom()
+        }
+    }
+    
     func updateMessages() {
         ref.addSnapshotListener { snapshot, error in
             if error != nil {
@@ -99,6 +117,19 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
                         
                         self.messages.append(message)
                     })
+                    
+                case .audio:
+                    if let url = (change.document.data()["audioURL"] as! String).toURL() {
+                        let message = Message(audioURL: url,
+                                              sender: sender,
+                                              messageId: "",
+                                              sentDate: Date())
+                        
+                        self.messages.append(message)                        
+                    } else {
+                        print("message not appended")
+                    }
+            
                 default:
                     break
                 }
@@ -116,6 +147,8 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
            complition(.text)
         } else if document.data()["imageURL"] as? String != "" {
            complition(.photo)
+        } else if document.data()["audioURL"] as? String !=  "" {
+            complition(.audio)
         }
     }
 }
@@ -138,7 +171,6 @@ extension ChatRoomPresenter {
             }
             
             ref.downloadURL { (url, error) in
-                // この時点でURLの頭が http:/firebase....という不自然な形をしています
                 guard let url = url else { return }
                 if error != nil {
                     return
@@ -160,6 +192,31 @@ extension ChatRoomPresenter {
             }
             
             complition(UIImage(data: data)!)
+        }
+    }
+}
+
+// MARK: Audio Helpers
+
+extension ChatRoomPresenter {
+    func saveAudioFile(_ localURL: URL) {
+        let fileName = Date().description
+        let audioRef = Storage.storage().reference().child("audio/\(fileName)")
+        
+        audioRef.putFile(from: localURL, metadata: nil) { metaData, error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+            
+            audioRef.downloadURL { [weak self] url, error in
+                guard let self = self else { return }
+                if error != nil {
+                    print(error!.localizedDescription)
+                }
+                
+                guard let url = url else { return }
+                self.saveAudioMessage(url)
+            }
         }
     }
 }

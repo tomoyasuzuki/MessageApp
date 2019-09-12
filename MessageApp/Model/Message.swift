@@ -8,6 +8,7 @@
 import MessageKit
 import FirebaseAuth
 import FirebaseFirestore
+import AVFoundation
 
 struct Message: MessageType {
     var messageId: String
@@ -26,6 +27,20 @@ struct Message: MessageType {
             self.image = image
             self.size = CGSize(width: 100, height: 100)
             self.placeholderImage = UIImage()
+        }
+    }
+    
+    struct customAudioItem: AudioItem {
+        var url: URL
+        var duration: Float
+        var size: CGSize
+        
+        init(audioURL: URL) {
+            self.url = audioURL
+            self.size = CGSize(width: 160, height: 35)
+            let audioAsset = AVURLAsset(url: url)
+            print(audioAsset.duration)
+            self.duration = Float(CMTimeGetSeconds(audioAsset.duration))
         }
     }
     
@@ -57,27 +72,10 @@ struct Message: MessageType {
         self.init(kind: .photo(mediaItem), sender: sender, sentDate: sentDate, messageId: messageId)
     }
     
-    
-    
-    
-    
-//    init?(document: QueryDocumentSnapshot) {
-//        let sentDate = document.data()["sentDate"] as? Timestamp
-//        let senderName = document.data()["senderName"] as? String
-//        let senderId = document.data()["senderID"] as? String
-//
-//        self.messageId = document.documentID
-//        self.sender = Sender(senderId: senderId!, displayName: senderName!)
-//        self.sentDate = sentDate!.dateValue()
-//
-//        if let content = document.data()["content"] as? String {
-//            self.kind = .text(content)
-//            self.content = content
-//            self.imageURL = nil
-//        } else if let imageURL = document.data()["imageURL"] as? String {
-//            self.kind = .photo(<#T##MediaItem#>)
-//            self.content = ""
-//            self.imageURL = imageURL
-//        }
-//    }
+    init(audioURL: URL, sender: SenderType, messageId: String, sentDate: Date) {
+        let audioItem = customAudioItem(audioURL: audioURL)
+        print(audioItem.duration)
+        print(audioItem.url)
+        self.init(kind: .audio(audioItem), sender: sender, sentDate: sentDate, messageId: messageId)
+    }
 }

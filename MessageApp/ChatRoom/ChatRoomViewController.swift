@@ -21,7 +21,14 @@ protocol ChatRoomViewControllerProtocol {
 class ChatRoomViewController: MessagesViewController {
     
     private let presenter = ChatRoomPresenter()
- 
+    
+    var audioRecorder: AVAudioRecorder!
+    var isRecording: Bool = false
+    var isPlaying: Bool = false
+    
+    var audioController: AudioController?
+    
+    
     var id: String!
     var name: String!
     
@@ -41,7 +48,19 @@ class ChatRoomViewController: MessagesViewController {
         configurePresenter()
         configureMessageUI()
         
+        audioController = AudioController(messageCollectionView: messagesCollectionView)
+        
+        
+        let longpressRecgnizer = UILongPressGestureRecognizer(target: self, action: #selector(startRecording))
+        longpressRecgnizer.delegate = self
+        view.addGestureRecognizer(longpressRecgnizer)
+        
         navigationItem.title = presenter.channel?.name
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        audioController?.stopAudio()
     }
     
     @objc func cameraButtonPressed() {
@@ -77,28 +96,29 @@ extension ChatRoomViewController {
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
-        
-//        scrollsToBottomOnKeyboardBeginsEditing = true
-//        maintainPositionOnKeyboardFrameChanged = true
+        messagesCollectionView.messageCellDelegate = self
         
         messageInputBar.delegate = self
         messageInputBar.sendButton.tintColor = UIColor.green
+        messageInputBar.inputTextView.placeholder = "Message"
         
         let cameraItem = InputBarButtonItem(type: .system)
         cameraItem.tintColor = .black
         cameraItem.image = UIImage(named: "imageicon_image")
-        
-        
-        cameraItem.addTarget(
-            self,
-            action: #selector(cameraButtonPressed),
-            for: .primaryActionTriggered
-        )
         cameraItem.setSize(CGSize(width: 60, height: 30), animated: false)
         
+        let audioItem = InputBarButtonItem(type: .system)
+        audioItem.tintColor = .black
+        audioItem.image = UIImage(named: "audioIcon")
+        audioItem.setSize(CGSize(width: 50, height: 25), animated: false)
+        
+        
+        cameraItem.addTarget(self,action: #selector(cameraButtonPressed),for: .primaryActionTriggered)
+        audioItem.addTarget(self, action: #selector(startRecording), for: .primaryActionTriggered)
+        
         messageInputBar.leftStackView.alignment = .center
-        messageInputBar.setLeftStackViewWidthConstant(to: 50, animated: false)
-        messageInputBar.setStackViewItems([cameraItem], forStack: .left, animated: false)
+        messageInputBar.setLeftStackViewWidthConstant(to: 110, animated: false)
+        messageInputBar.setStackViewItems([cameraItem, audioItem], forStack: .left, animated: false)
     }
 }
 
@@ -132,7 +152,7 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
                          in messagesCollectionView: MessagesCollectionView) -> UIColor {
         return isFromCurrentSender(message: message) ? .green : .white
     }
-
+    
     func shouldDisplayHeader(for message: MessageType, at indexPath: IndexPath,
                              in messagesCollectionView: MessagesCollectionView) -> Bool {
         return false
@@ -141,7 +161,7 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
     func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
         return .black
     }
-
+    
     func messageStyle(for message: MessageType, at indexPath: IndexPath,
                       in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
         return .bubble
@@ -152,32 +172,78 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
     }
 }
 
+// Photos method
+
 extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            
-            if let asset = info[.phAsset] as? PHAsset {
-                PHImageManager.default().requestImage(for: asset,
-                                                      targetSize: CGSize(width: 100, height: 100),
-                                                      contentMode: .aspectFit,
-                                                      options: nil) { [weak self] image, info in
+        
+        if let asset = info[.phAsset] as? PHAsset {
+            PHImageManager.default().requestImage(for: asset,
+                                                  targetSize: CGSize(width: 100, height: 100),
+                                                  contentMode: .aspectFit,
+                                                  options: nil) { [weak self] image, info in
+                                                    guard let self = self else { return }
+                                                    guard let image = image else { return }
+                                                    
+                                                    self.presenter.saveImage(image) { [weak self] url in
                                                         guard let self = self else { return }
-                                                        guard let image = image else { return }
-                                                        
-                                                        self.presenter.saveImage(image, complition: { [weak self] url in
-                                                            guard let self = self else { return }
-                                                            self.presenter.saveMessage(url)
-                                                        }
-                                                    )
-                                                }
-                
-            } else if let image = info[.originalImage] as? UIImage {
-                self.presenter.saveImage(image) { [weak self] url in
-                    guard let self = self else { return }
-                    self.presenter.saveMessage(url)
-                }
+                                                        self.presenter.saveMessage(url)
+                                                    }
             }
-
+            
+        } else if let image = info[.originalImage] as? UIImage {
+            self.presenter.saveImage(image) { [weak self] url in
+                guard let self = self else { return }
+                self.presenter.saveMessage(url)
+            }
+        }
+        
         picker.dismiss(animated: true, completion: nil)
+    }
+}
+
+// UITapGesture
+
+extension ChatRoomViewController: UIGestureRecognizerDelegate, AVAudioRecorderDelegate {
+    @objc func startRecording(_ sender: UILongPressGestureRecognizer) {
+        guard let localURL = audioController?.createLocalURL() else { return }
+        
+        if sender.state == .began {
+            audioController?.startRecordingAudio(url: localURL)
+        } else if sender.state == .ended {
+            audioController?.stopRecordingAudio()
+            // Firebase Storage にローカルの音声ファイルを保存する
+            self.presenter.saveAudioFile(localURL)
+        }
+    }
+}
+
+extension ChatRoomViewController: MessageCellDelegate, AVAudioPlayerDelegate {
+    func didTapPlayButton(in cell: AudioMessageCell) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell) else { return }
+        let message = presenter.messages[indexPath.row]
+        
+        if audioController?.state == .playing {
+            audioController?.pauseAudio(message: message, cell: cell)
+        } else if audioController?.state == .pause {
+            audioController?.resumeAudio(message: message, cell: cell)
+        } else if audioController?.state == .stopped {
+            audioController?.playAudio(message: message, cell: cell)
+        } else {
+            audioController?.stopAudio()
+        }
+    }
+    
+    func didStartAudio(in cell: AudioMessageCell) {
+        print("did startd audio")
+    }
+    
+    func didStopAudio(in cell: AudioMessageCell) {
+        print("did stop audio")
+    }
+    
+    func didPauseAudio(in cell: AudioMessageCell) {
+        print("did pause audio")
     }
 }
 
