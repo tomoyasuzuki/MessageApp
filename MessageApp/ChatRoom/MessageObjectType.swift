@@ -10,6 +10,4 @@ enum MessageObjectType {
     case text
     case photo
     case audio
-    case phoneNum
-    case location
 }

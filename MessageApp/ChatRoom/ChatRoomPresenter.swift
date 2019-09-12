@@ -9,6 +9,7 @@
 import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
+import MessageKit
 
 protocol ChatRoomPresenterProtocol {
     func saveMessage(_ text: String) -> Void
@@ -33,6 +34,8 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
     private var ref: CollectionReference {
         return db.collection(["channels", channel!.id, "threads"].joined(separator: "/"))
     }
+    
+    // save message
     
     func saveMessage(_ text: String) {
         ref.addDocument(data: ["senderID": sender.senderId,
@@ -81,6 +84,8 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
         }
     }
     
+    // update messages
+    
     func updateMessages() {
         ref.addSnapshotListener { snapshot, error in
             if error != nil {
@@ -95,43 +100,22 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
         }
     }
     
+    // handleDocumentChange
+    
     func handleDocumentChange(_ change: DocumentChange) {
         switch change.type {
         case .added:
-            self.judgeMessageType(change: change) { [weak self] result in
-                guard let self = self else { return }
+            self.judgeMessageType(change: change) { result in
                 switch result {
                 case .text:
-                    let message = Message(text: change.document.data()["content"] as! String,
-                                          sender: sender,
-                                          messageId: "",
-                                          sentDate: Date())
-                    self.messages.append(message)
+                    let message = createMessageObject(change: change, result: .text)
+                    setup(message)
                 case .photo:
-                    guard let url = (change.document.data()["imageURL"] as! String).toURL() else { return }
-                    getImage(url: url, complition: { image in
-                        let message = Message(image: image,
-                                              sender: self.sender,
-                                              messageId: "",
-                                              sentDate: Date())
-                        
-                        self.messages.append(message)
-                    })
-                    
+                    let message = createMessageObject(change: change, result: .photo)
+                    setup(message)
                 case .audio:
-                    if let url = (change.document.data()["audioURL"] as! String).toURL() {
-                        let message = Message(audioURL: url,
-                                              sender: sender,
-                                              messageId: "",
-                                              sentDate: Date())
-                        
-                        self.messages.append(message)                        
-                    } else {
-                        print("message not appended")
-                    }
-            
-                default:
-                    break
+                    let message = createMessageObject(change: change, result: .audio)
+                    setup(message)
                 }
             }
             self.view?.reloadData()
@@ -139,6 +123,8 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
             break
         }
     }
+    
+    // judgeMessageType
     
     func judgeMessageType(change: DocumentChange, complition: (MessageObjectType) -> ()) {
         let document = change.document
@@ -153,7 +139,7 @@ final class ChatRoomPresenter: ChatRoomPresenterProtocol {
     }
 }
 
-// MARK: Image Helpers
+// MARK: Image
 
 extension ChatRoomPresenter {
     func saveImage(_ image: UIImage, complition: @escaping (URL) -> ()) {
@@ -181,8 +167,10 @@ extension ChatRoomPresenter {
         }
     }
     
-    func getImage(url: URL, complition: @escaping(UIImage) -> ()) {
+    func getImage(url: URL) -> UIImage {
         let ref = Storage.storage().reference(forURL:url.absoluteString)
+        
+        var image: UIImage?
         
         ref.getData(maxSize: 1 * 1024 * 1024) { (data, error) in
             guard let data = data else { return }
@@ -191,12 +179,18 @@ extension ChatRoomPresenter {
                 return
             }
             
-            complition(UIImage(data: data)!)
+            image = UIImage(data: data)
+        }
+        
+        if let image = image {
+            return image
+        } else {
+            return UIImage(named: "userIcon")!
         }
     }
 }
 
-// MARK: Audio Helpers
+// MARK: Audio
 
 extension ChatRoomPresenter {
     func saveAudioFile(_ localURL: URL) {
@@ -221,8 +215,41 @@ extension ChatRoomPresenter {
     }
 }
 
-extension String {
-    func toURL() -> URL? {
-        return URL(string: self)
+// MARK: Private Methods
+
+extension ChatRoomPresenter {
+    private func setup(_ message: Message) {
+        self.messages.append(message)
+        let sortedMessages = self.messages.sortByDate()
+        self.messages = sortedMessages
+    }
+    
+    private func createMessageObject(change: DocumentChange, result: MessageObjectType) -> Message {
+        var message: Message!
+        
+        switch result {
+        case .text:
+           message =  Message(text: change.document.data()["content"] as! String,
+                                  sender: sender,
+                                  messageId: "",
+                                  sentDate: Date())
+        case .photo:
+            if let url = (change.document.data()["imageURL"] as! String).toURL() {
+                let image = getImage(url: url)
+                message = Message(image: image,
+                               sender: self.sender,
+                               messageId: "",
+                               sentDate: Date())
+
+            }
+        case .audio:
+            if let url = (change.document.data()["audioURL"] as! String).toURL() {
+                message = Message(audioURL: url,
+                               sender: sender,
+                               messageId: "",
+                               sentDate: Date())
+            }
+        }
+        return message
     }
 }
