@@ -43,6 +43,9 @@
                                 <state key="normal" title="Edit image">
                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
+                                <connections>
+                                    <action selector="editImageButtonTapped:" destination="DYR-O1-FRP" eventType="touchUpInside" id="Nz8-H5-Y53"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dHz-U0-2zd">
                                 <rect key="frame" x="160" y="370" width="56" height="38"/>
@@ -302,7 +305,7 @@
         <image name="userIcon" width="300" height="300"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Np8-Wu-zDd"/>
+        <segue reference="cNb-oE-rbq"/>
         <segue reference="e0R-9l-5Ht"/>
     </inferredMetricsTieBreakers>
 </document>

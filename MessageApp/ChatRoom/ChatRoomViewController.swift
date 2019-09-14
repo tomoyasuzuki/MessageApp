@@ -22,6 +22,13 @@ class ChatRoomViewController: MessagesViewController {
     
     private let presenter = ChatRoomPresenter()
     
+    lazy var autocompleteManager: AutocompleteManager = { [unowned self] in
+        let manager = AutocompleteManager(for: self.messageInputBar.inputTextView)
+        manager.delegate = self
+        manager.dataSource = self
+        return manager
+        }()
+    
     var audioRecorder: AVAudioRecorder!
     var isRecording: Bool = false
     var isPlaying: Bool = false
@@ -45,17 +52,14 @@ class ChatRoomViewController: MessagesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.title = presenter.channel?.name
+        
         configurePresenter()
         configureMessageUI()
+        configureAutoCompleteManager()
+        configureRecognizer()
         
         audioController = AudioController(messageCollectionView: messagesCollectionView)
-        
-        
-        let longpressRecgnizer = UILongPressGestureRecognizer(target: self, action: #selector(startRecording))
-        longpressRecgnizer.delegate = self
-        view.addGestureRecognizer(longpressRecgnizer)
-        
-        navigationItem.title = presenter.channel?.name
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -86,6 +90,17 @@ extension ChatRoomViewController: InputBarAccessoryViewDelegate{
 }
 
 extension ChatRoomViewController {
+    private func configureRecognizer() {
+        let longpressRecgnizer = UILongPressGestureRecognizer(target: self, action: #selector(startRecording))
+        longpressRecgnizer.delegate = self
+        view.addGestureRecognizer(longpressRecgnizer)
+    }
+    
+    private func configureAutoCompleteManager() {
+        autocompleteManager.register(prefix: "@", with: [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.gray, .backgroundColor: UIColor.green])
+        autocompleteManager.maxSpaceCountDuringCompletion = 1
+    }
+    
     private func configurePresenter() {
         presenter.view = self
         presenter.channel = Channel(id: id, name: name)
@@ -119,6 +134,8 @@ extension ChatRoomViewController {
         messageInputBar.leftStackView.alignment = .center
         messageInputBar.setLeftStackViewWidthConstant(to: 110, animated: false)
         messageInputBar.setStackViewItems([cameraItem, audioItem], forStack: .left, animated: false)
+        
+        messageInputBar.inputPlugins = [autocompleteManager]
     }
 }
 
@@ -170,6 +187,15 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
     func configureMediaMessageImageView(_ imageView: UIImageView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
         imageView.adjustsImageSizeForAccessibilityContentSizeCategory = true
     }
+    
+    func audioTintColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+        return isFromCurrentSender(message: message) ? .white : UIColor(red: 15/255, green: 135/255, blue: 255/255, alpha: 1.0)
+    }
+    
+    func configureAudioCell(_ cell: AudioMessageCell, message: MessageType) {
+        audioController?.configureAudioCell(cell, message: message)
+    }
+
 }
 
 // Photos method
@@ -206,12 +232,15 @@ extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationC
 
 extension ChatRoomViewController: UIGestureRecognizerDelegate, AVAudioRecorderDelegate {
     @objc func startRecording(_ sender: UILongPressGestureRecognizer) {
+        print("start recording")
         guard let localURL = audioController?.createLocalURL() else { return }
         
         if sender.state == .began {
             audioController?.startRecordingAudio(url: localURL)
+            print("began")
         } else if sender.state == .ended {
             audioController?.stopRecordingAudio()
+            print("finish recording")
             // Firebase Storage にローカルの音声ファイルを保存する
             self.presenter.saveAudioFile(localURL)
         }
@@ -246,4 +275,59 @@ extension ChatRoomViewController: MessageCellDelegate, AVAudioPlayerDelegate {
         print("did pause audio")
     }
 }
+
+
+extension ChatRoomViewController: AutocompleteManagerDelegate, AutocompleteManagerDataSource {
+    
+    func autocompleteManager(_ manager: AutocompleteManager, shouldBecomeVisible: Bool) {
+        print("should become visible")
+        setAutocompleteManager(active: shouldBecomeVisible)
+    }
+    
+    func autocompleteManager(_ manager: AutocompleteManager, autocompleteSourceFor prefix: String) -> [AutocompleteCompletion] {
+        
+        if prefix == "@" {
+            print("prefix is @")
+            return presenter.messages.map { return AutocompleteCompletion(text: $0.sender.displayName, context: ["id": $0.sender.senderId])}
+        } else {
+            return []
+        }
+    }
+    
+    
+    func autocompleteManager(_ manager: AutocompleteManager, tableView: UITableView, cellForRowAt indexPath: IndexPath, for session: AutocompleteSession) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: AutocompleteCell.reuseIdentifier, for: indexPath) as? AutocompleteCell else { fatalError("autocomplete cell is nil") }
+        
+        let users = presenter.messages.map{ $0.sender }
+        let id = session.completion?.context?["id"] as? String
+        let user = users.filter { return $0.senderId == id }.first
+        if let sender = user {
+//            cell.imageView?.image = UIImage(contentsOfFile: fileURL.path)
+        }
+        
+        cell.imageViewEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        cell.imageView?.layer.cornerRadius = 14
+        cell.imageView?.layer.borderColor = UIColor.green.cgColor
+        cell.imageView?.layer.borderWidth = 1
+        cell.imageView?.clipsToBounds = true
+        cell.textLabel?.attributedText = manager.attributedText(matching: session, fontSize: 15)
+        return cell
+    }
+    
+    func setAutocompleteManager(active: Bool) {
+        let topStackView = messageInputBar.topStackView
+        if active && !topStackView.arrangedSubviews.contains(autocompleteManager.tableView) {
+            topStackView.insertArrangedSubview(autocompleteManager.tableView, at: topStackView.arrangedSubviews.count)
+            topStackView.layoutIfNeeded()
+            print("active")
+        } else if !active && topStackView.arrangedSubviews.contains(autocompleteManager.tableView) {
+            topStackView.removeArrangedSubview(autocompleteManager.tableView)
+            topStackView.layoutIfNeeded()
+            print("not active")
+        }
+        messageInputBar.invalidateIntrinsicContentSize()
+    }
+}
+    
+
 

@@ -37,6 +37,17 @@ class ChannelsViewController: UIViewController {
     }
 }
 
+// MARK: Private Methods
+
+extension ChannelsViewController {
+    private func configurePresenter() {
+        presenter.view = self
+        presenter.updateChannels()
+    }
+}
+
+// MARK: TableView Delegate
+
 extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return presenter.channels.count
@@ -53,18 +64,12 @@ extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // ここで渡すのはuser情報ではなくchannel情報
         navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
     }
     
 }
 
-extension ChannelsViewController {
-    private func configurePresenter() {
-        presenter.view = self
-        presenter.updateChannels()
-    }
-}
+// MARK: Protocol Delegate
 
 extension ChannelsViewController: ChannelViewControllerProtocol {
     func showAlert() {

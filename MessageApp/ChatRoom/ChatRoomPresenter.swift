@@ -202,6 +202,8 @@ extension ChatRoomPresenter {
                 print(error.localizedDescription)
             }
             
+            print("save audio file")
+            
             audioRef.downloadURL { [weak self] url, error in
                 guard let self = self else { return }
                 if error != nil {
@@ -210,6 +212,7 @@ extension ChatRoomPresenter {
                 
                 guard let url = url else { return }
                 self.saveAudioMessage(url)
+                print("saved audio message")
             }
         }
     }
