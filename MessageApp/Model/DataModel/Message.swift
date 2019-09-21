@@ -25,7 +25,7 @@ struct Message: MessageType {
         
         init(image: UIImage) {
             self.image = image
-            self.size = CGSize(width: 100, height: 100)
+            self.size = CGSize(width: 200, height: 200)
             self.placeholderImage = UIImage()
         }
     }
@@ -74,8 +74,8 @@ struct Message: MessageType {
     
     init(audioURL: URL, sender: SenderType, messageId: String, sentDate: Date) {
         let audioItem = customAudioItem(audioURL: audioURL)
-        print(audioItem.duration)
-        print(audioItem.url)
+        print("duration: \(audioItem.duration)")
         self.init(kind: .audio(audioItem), sender: sender, sentDate: sentDate, messageId: messageId)
     }
 }
+

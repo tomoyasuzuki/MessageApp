@@ -7,9 +7,9 @@
 //
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 protocol ChannelSearchPresenterProtocol {
-    func judgeTableViewStatus() -> Bool
     func fetchChannels(_ text: String) -> Void
 }
 
@@ -23,45 +23,53 @@ final class ChannelSearchPresenter {
 
 extension ChannelSearchPresenter: ChannelSearchPresenterProtocol {
     func fetchChannels(_ text: String) {
-        let ref = Firestore.firestore().collection("channels")
         var temp: [String] = []
         
         self.channels = []
         
-        ref.addSnapshotListener { snapshot, error in
-            if error != nil {
-                return
-            }
-            
-            snapshot?.documentChanges.forEach { [weak self] change in
+        FireBaseManager.shared.bindAllChannelSnapshot { (snapshot) in
+            snapshot.documentChanges.forEach { [weak self] change in
                 guard let self = self else { return }
                 
-                let document = change.document
-                
-                guard let name = document.data()["name"] as? String else { return }
+                let documentID = change.document.documentID
+    
+                guard let name = change.document.data()["name"] as? String else { return }
+                guard let members = change.document.data()["members"] as? [String] else { return }
                 
                 temp.append(name)
                 temp.forEach { string in
                     if string.contains(text) {
-                        let channel = Channel(id: document.documentID, name: name)
+                    let urlString = change
+                            .document
+                            .data()[Resources.strings.KeyImageURL] as! String
+                        
+                        let url = URL(string: urlString)
+                        
+                        let channel = Channel(id: documentID, name: name, image: UIImage(named: "userIcon")!, members: members)
                         self.channels.append(channel)
-                    } else {
-                        return
+                        
+//                        FireBaseManager.shared.getImageData(url) { data in
+//                            guard let image = UIImage(data: data) else { return }
+//
+//                            let channel = Channel(id: documentID, name: name, image: UIImage(named: "userIcon")!, members: members)
+//                            self.channels.append(channel)
+//                        }
                     }
                 }
+                
                 temp = []
-    
+            
+                
+                print("hit: \(self.channels.count)")
+                
+                if self.channels.isEmpty {
+                    self.view?.changeTableViewStatus(isHidden: true)
+                } else {
+                    self.view?.changeTableViewStatus(isHidden: false)
+                }
+                
                 self.view?.reloadData()
-                self.view?.changeTableViewStatus(isHidden: self.judgeTableViewStatus())
             }
-        }
-    }
-    
-    func judgeTableViewStatus() -> Bool {
-        if channels.isEmpty {
-            return true
-        } else {
-            return false
         }
     }
 }

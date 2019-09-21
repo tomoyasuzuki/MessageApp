@@ -15,7 +15,7 @@ protocol ChatSearchViewControllerProtocol {
     func reloadData() -> Void
 }
 
-class ChatSearchViewController: UIViewController {
+final class ChatSearchViewController: UIViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
     
@@ -28,9 +28,11 @@ class ChatSearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.title = "ChatSearch"
+        
         tableView.delegate = self
         tableView.dataSource = self
-        
+        tableView.register(ChannelSearchTableViewCell.self, forCellReuseIdentifier: "ChannelSearchCell")
         searchBar.delegate = self
         
         presenter.view = self
@@ -58,19 +60,17 @@ extension ChatSearchViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelSearchCell", for: indexPath)
-        cell.textLabel?.text = presenter.channels[indexPath.row].name
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChannelSearchCell", for: indexPath) as! ChannelSearchTableViewCell
+        cell.configureDataSource(presenter.channels[indexPath.row])
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(presenter.channels[indexPath.row].id,presenter.channels[indexPath.row].name)
-        navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
     }
 }
 
 extension ChatSearchViewController: UISearchBarDelegate {
-    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         SVProgressHUD.show()
         presenter.fetchChannels(searchText)

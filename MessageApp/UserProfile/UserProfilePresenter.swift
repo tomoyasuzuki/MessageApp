@@ -57,4 +57,14 @@ final class UserProfilePresenter: UserProfilePresenterProtocol {
             Successd(false)
         }
     }
+    
+    func saveImageDataToStorage(_ data: Data) {
+        FireBaseManager.shared.saveData(path: Resources.strings.KeyProfileImage, data: data) { (url) in
+            if let url = url {
+                FireBaseManager.shared.changeUserInfo(imageURL: url)
+            } else {
+                return
+            }
+        }
+    }
 }

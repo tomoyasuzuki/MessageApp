@@ -26,6 +26,7 @@ final class AudioController: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDel
     
     init(messageCollectionView: MessagesCollectionView) {
         self.messageCollectionView = messageCollectionView
+        super.init()
     }
     
     func configureAudioCell(_ cell: AudioMessageCell, message: MessageType) {
@@ -37,6 +38,7 @@ final class AudioController: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDel
             guard let displayDelegate = collectionView.messagesDisplayDelegate else {
                 fatalError("MessagesDisplayDelegate has not been set.")
             }
+            
             cell.durationLabel.text = displayDelegate.audioProgressTextFormat(Float(audioPlayer.currentTime), for: cell, in: collectionView)
         }
     }
@@ -65,17 +67,19 @@ final class AudioController: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDel
         switch message.kind {
         case .audio(let item):
             
-            let storageRef = Storage.storage().reference(forURL: item.url.description)
+            let storageRef = Storage.storage().reference(forURL: item.url.absoluteString)
             
             storageRef.getData(maxSize: 1 * 1024 * 1024) { data, error in
                 if let error = error {
                     print(error.localizedDescription)
+                    print("fail get data")
                 }
                 
                 guard let data = data else { return }
                 guard let player = try? AVAudioPlayer(data: data) else { return }
                 
                 self.audioPlayer = player
+                self.audioPlayer?.prepareToPlay()
                 self.audioPlayer?.play()
                 self.state = .playing
                 
@@ -99,6 +103,7 @@ final class AudioController: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDel
     }
     
     func resumeAudio(message: MessageType, cell: AudioMessageCell) {
+        audioPlayer?.prepareToPlay()
         audioPlayer?.play()
         
         state = .playing
@@ -155,6 +160,7 @@ extension AudioController {
         progressTimer = nil
         progressTimer = Timer(timeInterval: 0.1, target: self, selector: #selector(didFiredTimer), userInfo: nil, repeats: true)
     }
+    
     func createLocalURL() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         let documentsDirectory = paths[0].appendingPathComponent(".m4a")

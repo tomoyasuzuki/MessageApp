@@ -73,6 +73,9 @@ class LoginPresenter: LoginPresenterProtocol {
     
     func createUser() {
         guard let  user = Auth.auth().currentUser else { return }
-        ref.document(user.uid).setData(["name": user.displayName ?? "unknown", "belongs":[]])
+        ref.document(user.uid).setData(["name": user.displayName ?? "unknown",
+                                        "id": user.uid,
+                                        "imageURL": "",
+                                        "belongs":[]])
     }
 }

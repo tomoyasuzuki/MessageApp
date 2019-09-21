@@ -11,16 +11,19 @@ import MessageKit
 import InputBarAccessoryView
 import Photos
 import FirebaseStorage
+import FirebaseAuth
 import FirebaseFirestore
+import SVProgressHUD
 
 protocol ChatRoomViewControllerProtocol {
     func reloadData() -> Void
     func scrollToBottom() -> Void
 }
 
-class ChatRoomViewController: MessagesViewController {
+final class ChatRoomViewController: MessagesViewController {
     
     private let presenter = ChatRoomPresenter()
+    private let user = Auth.auth().currentUser
     
     lazy var autocompleteManager: AutocompleteManager = { [unowned self] in
         let manager = AutocompleteManager(for: self.messageInputBar.inputTextView)
@@ -38,11 +41,15 @@ class ChatRoomViewController: MessagesViewController {
     
     var id: String!
     var name: String!
+    var image: UIImage!
+    var members: [String]!
     
-    init(id: String, name: String) {
+    init(id: String, name: String, image: UIImage, members: [String]) {
         super.init(nibName: nil, bundle: nil)
         self.id = id
         self.name = name
+        self.image = image
+        self.members = members
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -103,8 +110,11 @@ extension ChatRoomViewController {
     
     private func configurePresenter() {
         presenter.view = self
-        presenter.channel = Channel(id: id, name: name)
-        presenter.updateMessages()
+        presenter.channel = Channel(id: id, name: name, image: image, members: members)
+        
+        DispatchQueue.global(qos: .default).async {
+            self.presenter.updateMessages()
+        }
     }
     
     private func configureMessageUI() {
@@ -195,6 +205,14 @@ extension ChatRoomViewController: MessagesDisplayDelegate, MessagesLayoutDelegat
     func configureAudioCell(_ cell: AudioMessageCell, message: MessageType) {
         audioController?.configureAudioCell(cell, message: message)
     }
+    
+    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+        if let fileURL = UserDefaults.standard.url(forKey: "profileImage") {
+            avatarView.image = UIImage(contentsOfFile: fileURL.path)
+        } else {
+            avatarView.image = UIImage(named: "userIcon")
+        }
+    }
 
 }
 
@@ -211,16 +229,19 @@ extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationC
                                                     guard let self = self else { return }
                                                     guard let image = image else { return }
                                                     
-                                                    self.presenter.saveImage(image) { [weak self] url in
+                                                    self.presenter.saveImage(image) { [weak self] (url) in
                                                         guard let self = self else { return }
-                                                        self.presenter.saveMessage(url)
+                                                        
+                                                        self.presenter.saveImageMessage(url)
                                                     }
+                                                    
             }
             
         } else if let image = info[.originalImage] as? UIImage {
-            self.presenter.saveImage(image) { [weak self] url in
+            self.presenter.saveImage(image) { [weak self] (url) in
                 guard let self = self else { return }
-                self.presenter.saveMessage(url)
+                
+                self.presenter.saveImageMessage(url)
             }
         }
         
@@ -232,17 +253,17 @@ extension ChatRoomViewController: UIImagePickerControllerDelegate, UINavigationC
 
 extension ChatRoomViewController: UIGestureRecognizerDelegate, AVAudioRecorderDelegate {
     @objc func startRecording(_ sender: UILongPressGestureRecognizer) {
-        print("start recording")
         guard let localURL = audioController?.createLocalURL() else { return }
         
         if sender.state == .began {
             audioController?.startRecordingAudio(url: localURL)
-            print("began")
         } else if sender.state == .ended {
             audioController?.stopRecordingAudio()
-            print("finish recording")
-            // Firebase Storage にローカルの音声ファイルを保存する
-            self.presenter.saveAudioFile(localURL)
+            self.presenter.saveAudioFile(localURL) { [weak self] (url) in
+                guard let self = self else { return }
+                
+                self.presenter.saveAudioMessage(url)
+            }
         }
     }
 }
@@ -280,15 +301,19 @@ extension ChatRoomViewController: MessageCellDelegate, AVAudioPlayerDelegate {
 extension ChatRoomViewController: AutocompleteManagerDelegate, AutocompleteManagerDataSource {
     
     func autocompleteManager(_ manager: AutocompleteManager, shouldBecomeVisible: Bool) {
-        print("should become visible")
         setAutocompleteManager(active: shouldBecomeVisible)
     }
     
     func autocompleteManager(_ manager: AutocompleteManager, autocompleteSourceFor prefix: String) -> [AutocompleteCompletion] {
+        guard let user = user else {
+            print("current user is nil")
+            return []
+        }
         
         if prefix == "@" {
-            print("prefix is @")
-            return presenter.messages.map { return AutocompleteCompletion(text: $0.sender.displayName, context: ["id": $0.sender.senderId])}
+            return presenter.messages
+                .filter { $0.sender.senderId != user.uid}
+                .map { return AutocompleteCompletion(text: $0.sender.displayName, context: ["id": $0.sender.senderId])}
         } else {
             return []
         }
@@ -302,10 +327,19 @@ extension ChatRoomViewController: AutocompleteManagerDelegate, AutocompleteManag
         let id = session.completion?.context?["id"] as? String
         let user = users.filter { return $0.senderId == id }.first
         if let sender = user {
-//            cell.imageView?.image = UIImage(contentsOfFile: fileURL.path)
+            FireBaseManager.shared.getUser(id: sender.senderId) { (snapshot) in
+                snapshot?.documentChanges.forEach { (documentchange) in
+                    if let imageURLString = documentchange.document.data()[Resources.strings.KeyImageURL] as? String {
+                        let imageURL = URL(string: imageURLString)
+                        
+                        FireBaseManager.shared.getImageData(imageURL) { (data) in
+                            cell.imageView?.image = UIImage(data: data)!
+                        }   
+                    }
+                }
+            }
         }
         
-        cell.imageViewEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         cell.imageView?.layer.cornerRadius = 14
         cell.imageView?.layer.borderColor = UIColor.green.cgColor
         cell.imageView?.layer.borderWidth = 1

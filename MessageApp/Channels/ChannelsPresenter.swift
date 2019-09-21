@@ -8,6 +8,7 @@
 
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 protocol ChannelPresenterProtocol {
     func updateChannels() -> Void
@@ -15,27 +16,9 @@ protocol ChannelPresenterProtocol {
 
 final class ChannelPresenter {
     var view: ChannelViewControllerProtocol? = nil
-    
-    private let ref = Firestore.firestore().collection("channels")
-    private let user = Auth.auth().currentUser
-    
     var channels: [Channel] = []
     
-    func addUserDocument(channelName: String) {
-        guard let user = user else { return }
-        self.ref.addDocument(data: ["name": channelName, "members": [user.uid]])
-    }
-    
-    func handleDocumentChanged(_ change: DocumentChange) {
-        guard let channel = Channel(change.document) else { return }
-        
-        switch change.type {
-        case .added:
-            insertNewChannel(channel)
-        default:
-            break
-        }
-    }
+    private let user = Auth.auth().currentUser
     
     func insertNewChannel(_ channel: Channel) {
         channels.append(channel)
@@ -43,22 +26,39 @@ final class ChannelPresenter {
     }
 }
 
+extension ChannelPresenter {
+    private func handleDocumentChanged(_ change: DocumentChange) {
+        let document = change.document
+        
+        guard let name = document.data()[Resources.strings.KeyName] as? String else { return }
+        guard let members = document.data()[Resources.strings.KeyMembers] as? [String] else { return }
+        guard let url = document.data()[Resources.strings.KeyImageURL] as? String else { return }
+        
+        guard let imageURL = URL(string: url) else { return }
+        
+        FireBaseManager.shared.getImageData(imageURL) { (data) in
+            guard let image = UIImage(data: data) else { return }
+            
+            let channel = Channel(id: document.documentID, name: name, image: image, members: members)
+            
+            switch change.type {
+            case .added:
+                self.insertNewChannel(channel)
+            default:
+                break
+            }
+        }
+    }
+}
+
 extension ChannelPresenter: ChannelPresenterProtocol {
     func updateChannels() {
-        guard  let user = user else { return }
+        guard let user = user else { return }
         
-        Firestore.firestore()
-            .collection("channels")
-            .whereField("members", arrayContains: user.uid)
-            .addSnapshotListener { (querySnapshot, error) in
-                if querySnapshot == nil || error != nil {
-                    print("channels update error: \(error!.localizedDescription)")
-                    return
-                }
-                
-                querySnapshot?.documentChanges.forEach { change in
-                    self.handleDocumentChanged(change)
-                }
+        FireBaseManager.shared.bindSnapshot(userId: user.uid) { (snapshot) in
+            snapshot.documentChanges.forEach { (documentchange) in
+                self.handleDocumentChanged(documentchange)
+            }
         }
     }
 }

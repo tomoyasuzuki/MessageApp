@@ -52,7 +52,9 @@ class UserProfileViewController: UIViewController {
     
     @IBAction func nextButtonTapped(_ sender: Any) {
         if let name = nameTextField.text, !name.isEmpty {
+            SVProgressHUD.show()
             self.presenter.setUserDisplayName(name: name)
+            SVProgressHUD.dismiss()
         } else {
             return
         }
@@ -67,7 +69,6 @@ extension UserProfileViewController {
     }
     
     private func configureImageView() {
-        userProfileImageView.contentMode = .scaleAspectFit
         userProfileImageView.clipsToBounds = true
         userProfileImageView.layer.cornerRadius = userProfileImageView.frame.height / 2
     }
@@ -115,6 +116,11 @@ extension UserProfileViewController: UIImagePickerControllerDelegate, UINavigati
                                                     self.presenter.saveUserProfileImage(image) { successd in
                                                         if successd {
                                                             print("image saved")
+                                                            if let localPath = UserDefaults.standard.url(forKey: "profileImage") {
+                                                                let data = try! Data(contentsOf: localPath)
+                                                                
+                                                            }
+                                                            
                                                         } else {
                                                             print("fail image save")
                                                         }

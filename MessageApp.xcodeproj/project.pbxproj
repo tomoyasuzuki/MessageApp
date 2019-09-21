@@ -29,6 +29,13 @@
 		5729EAB32315A1ED001FB1C9 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5729EAB22315A1ED001FB1C9 /* GoogleService-Info.plist */; };
 		5729EAB723162C60001FB1C9 /* ChannelsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5729EAB623162C60001FB1C9 /* ChannelsViewController.swift */; };
 		573435C6232A2CBC0066D66B /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435C5232A2CBC0066D66B /* Extentions.swift */; };
+		573435CA232DD4550066D66B /* ChannelSearchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435C9232DD4550066D66B /* ChannelSearchTableViewCell.swift */; };
+		573435CE232F132B0066D66B /* CreateChannelViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435CD232F132B0066D66B /* CreateChannelViewController.swift */; };
+		573435D1232F18DD0066D66B /* MediaPickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435D0232F18DD0066D66B /* MediaPickerManager.swift */; };
+		573435D82333B5770066D66B /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435D72333B5770066D66B /* FirebaseManager.swift */; };
+		573435DA2333B8C20066D66B /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435D92333B8C10066D66B /* Resources.swift */; };
+		573435DC2333B9900066D66B /* StoredMessageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435DB2333B9900066D66B /* StoredMessageObject.swift */; };
+		573435DE233415370066D66B /* CreateChannelPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573435DD233415370066D66B /* CreateChannelPresenter.swift */; };
 		57E72FFE23166A4F0010A16D /* LoginPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E72FFD23166A4F0010A16D /* LoginPresenter.swift */; };
 		57E7300023166ED70010A16D /* ChatRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E72FFF23166ED70010A16D /* ChatRoomViewController.swift */; };
 		57E730082316751B0010A16D /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E730072316751B0010A16D /* Message.swift */; };
@@ -61,6 +68,13 @@
 		5729EAB22315A1ED001FB1C9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5729EAB623162C60001FB1C9 /* ChannelsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelsViewController.swift; sourceTree = "<group>"; };
 		573435C5232A2CBC0066D66B /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
+		573435C9232DD4550066D66B /* ChannelSearchTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelSearchTableViewCell.swift; sourceTree = "<group>"; };
+		573435CD232F132B0066D66B /* CreateChannelViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChannelViewController.swift; sourceTree = "<group>"; };
+		573435D0232F18DD0066D66B /* MediaPickerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPickerManager.swift; sourceTree = "<group>"; };
+		573435D72333B5770066D66B /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
+		573435D92333B8C10066D66B /* Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resources.swift; sourceTree = "<group>"; };
+		573435DB2333B9900066D66B /* StoredMessageObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredMessageObject.swift; sourceTree = "<group>"; };
+		573435DD233415370066D66B /* CreateChannelPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChannelPresenter.swift; sourceTree = "<group>"; };
 		57E72FFD23166A4F0010A16D /* LoginPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPresenter.swift; sourceTree = "<group>"; };
 		57E72FFF23166ED70010A16D /* ChatRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomViewController.swift; sourceTree = "<group>"; };
 		57E730072316751B0010A16D /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
@@ -127,6 +141,7 @@
 			children = (
 				5729EAB623162C60001FB1C9 /* ChannelsViewController.swift */,
 				5720A117231C02A900512154 /* ChannelsPresenter.swift */,
+				573435CF232F13390066D66B /* CreateChannel */,
 				5720A11E231E180400512154 /* Cell */,
 			);
 			path = Channels;
@@ -137,8 +152,7 @@
 			children = (
 				57E72FFF23166ED70010A16D /* ChatRoomViewController.swift */,
 				5720A119231CE5B700512154 /* ChatRoomPresenter.swift */,
-				57264D67231F4C790056DC53 /* MessageObjectType.swift */,
-				57264D70232753A20056DC53 /* AudioController.swift */,
+				573435D223308E1A0066D66B /* MessageObjectTypeEnum */,
 			);
 			path = ChatRoom;
 			sourceTree = "<group>";
@@ -146,9 +160,8 @@
 		57229F1623179194006E9150 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				57E730072316751B0010A16D /* Message.swift */,
-				57229F1C231A598B006E9150 /* Sender.swift */,
-				57229F1E231A59FF006E9150 /* Channel.swift */,
+				573435D52333B51D0066D66B /* DataModel */,
+				573435D72333B5770066D66B /* FirebaseManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -168,6 +181,7 @@
 			children = (
 				57264D6B23228A0C0056DC53 /* ChatSearchViewController.swift */,
 				57264D6D23228A190056DC53 /* ChatSearchPresenter.swift */,
+				573435D423308E5D0066D66B /* Cell */,
 			);
 			path = ChatSearch;
 			sourceTree = "<group>";
@@ -201,6 +215,7 @@
 				57264D6F23228A1E0056DC53 /* ChatSearch */,
 				57229F1623179194006E9150 /* Model */,
 				5720A11D231E141B00512154 /* Extention */,
+				573435D323308E300066D66B /* Helpers */,
 				5729EA9F231589E5001FB1C9 /* Main.storyboard */,
 				5729EAA5231589E9001FB1C9 /* Assets.xcassets */,
 				5729EAA7231589E9001FB1C9 /* LaunchScreen.storyboard */,
@@ -209,6 +224,52 @@
 				5729EAA2231589E5001FB1C9 /* MessageApp.xcdatamodeld */,
 			);
 			path = MessageApp;
+			sourceTree = "<group>";
+		};
+		573435CF232F13390066D66B /* CreateChannel */ = {
+			isa = PBXGroup;
+			children = (
+				573435CD232F132B0066D66B /* CreateChannelViewController.swift */,
+				573435DD233415370066D66B /* CreateChannelPresenter.swift */,
+			);
+			path = CreateChannel;
+			sourceTree = "<group>";
+		};
+		573435D223308E1A0066D66B /* MessageObjectTypeEnum */ = {
+			isa = PBXGroup;
+			children = (
+				57264D67231F4C790056DC53 /* MessageObjectType.swift */,
+			);
+			path = MessageObjectTypeEnum;
+			sourceTree = "<group>";
+		};
+		573435D323308E300066D66B /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				57264D70232753A20056DC53 /* AudioController.swift */,
+				573435D0232F18DD0066D66B /* MediaPickerManager.swift */,
+				573435D92333B8C10066D66B /* Resources.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		573435D423308E5D0066D66B /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				573435C9232DD4550066D66B /* ChannelSearchTableViewCell.swift */,
+			);
+			path = Cell;
+			sourceTree = "<group>";
+		};
+		573435D52333B51D0066D66B /* DataModel */ = {
+			isa = PBXGroup;
+			children = (
+				57E730072316751B0010A16D /* Message.swift */,
+				573435DB2333B9900066D66B /* StoredMessageObject.swift */,
+				57229F1C231A598B006E9150 /* Sender.swift */,
+				57229F1E231A59FF006E9150 /* Channel.swift */,
+			);
+			path = DataModel;
 			sourceTree = "<group>";
 		};
 		A594F899BBEF1B72C58E2AA5 /* Pods */ = {
@@ -350,21 +411,28 @@
 				57229F1F231A59FF006E9150 /* Channel.swift in Sources */,
 				57229F25231AB5F6006E9150 /* AuthError.swift in Sources */,
 				57264D6C23228A0C0056DC53 /* ChatSearchViewController.swift in Sources */,
+				573435DC2333B9900066D66B /* StoredMessageObject.swift in Sources */,
+				573435CE232F132B0066D66B /* CreateChannelViewController.swift in Sources */,
 				57E730082316751B0010A16D /* Message.swift in Sources */,
+				573435D1232F18DD0066D66B /* MediaPickerManager.swift in Sources */,
 				5729EAA4231589E5001FB1C9 /* MessageApp.xcdatamodeld in Sources */,
+				573435CA232DD4550066D66B /* ChannelSearchTableViewCell.swift in Sources */,
 				5720A118231C02A900512154 /* ChannelsPresenter.swift in Sources */,
 				5720A11A231CE5B700512154 /* ChatRoomPresenter.swift in Sources */,
 				57264D71232753A20056DC53 /* AudioController.swift in Sources */,
 				57229F1D231A598B006E9150 /* Sender.swift in Sources */,
 				5729EA9C231589E5001FB1C9 /* AppDelegate.swift in Sources */,
 				5720A112231BFD6500512154 /* UserProfilePresenter.swift in Sources */,
+				573435D82333B5770066D66B /* FirebaseManager.swift in Sources */,
 				57E72FFE23166A4F0010A16D /* LoginPresenter.swift in Sources */,
+				573435DE233415370066D66B /* CreateChannelPresenter.swift in Sources */,
 				57229F1B231A3512006E9150 /* ChannelsTableViewCell.swift in Sources */,
 				57229F182317FDB9006E9150 /* UserProfileViewController.swift in Sources */,
 				57264D68231F4C790056DC53 /* MessageObjectType.swift in Sources */,
 				5720A114231BFFB500512154 /* UpdateUserProfileError.swift in Sources */,
 				57E7300023166ED70010A16D /* ChatRoomViewController.swift in Sources */,
 				573435C6232A2CBC0066D66B /* Extentions.swift in Sources */,
+				573435DA2333B8C20066D66B /* Resources.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
