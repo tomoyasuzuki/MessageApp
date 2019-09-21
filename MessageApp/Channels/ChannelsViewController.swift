@@ -7,36 +7,94 @@
 //
 
 import UIKit
+import SVProgressHUD
+import SnapKit
 import Firebase
 
 
 protocol ChannelViewControllerProtocol {
-    func showAlert() -> Void
+    func showPopupView() -> Void
     func reloadData() -> Void
 }
 
-class ChannelsViewController: UIViewController {
-    @IBOutlet weak var searchBar: UISearchBar!
+final class ChannelsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-
+    
     private var presenter = ChannelPresenter()
+    
+    fileprivate lazy var createButton: UIButton = {
+        return UIButton()
+    }()
+    
+    fileprivate lazy var searchButton: UIButton = {
+        return UIButton()
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        presenter.view = self
-        presenter.chatchChatsSnapshot()
+        view.addSubview(createButton)
+        view.addSubview(searchButton)
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(ChannelsTableViewCell.self, forCellReuseIdentifier: "ChannelTableViewCell")
+        
+        configurePresenter()
+        configureUIComponents()
+        configureConstraints()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
    
-    @IBAction func createChannelButtonTapped(_ sender: Any) {
-        self.showAlert()
+    @objc func create() {
+        self.showPopupView()
+    }
+    
+    @objc func search() {
+        self.performSegue(withIdentifier: "navigateToChatSearch", sender: nil)
     }
 }
+
+// MARK: Private Methods
+
+extension ChannelsViewController {
+    private func configurePresenter() {
+        presenter.view = self
+        presenter.updateChannels()
+    }
+    
+    private func configureConstraints() {
+        createButton.snp.makeConstraints { make in
+            make.left.equalTo(view).offset(16)
+            make.bottom.equalTo(view).offset(-16)
+            make.width.height.equalTo(50)
+        }
+        
+        searchButton.snp.makeConstraints { make in
+            make.right.equalTo(view).offset(-16)
+            make.bottom.equalTo(view).offset(-16)
+            make.width.height.equalTo(50)
+        }
+    }
+    
+    private func configureUIComponents() {
+        createButton.setImage(UIImage(named: "plus_3"), for: .normal)
+        createButton.layer.cornerRadius = createButton.frame.height / 2
+        createButton.clipsToBounds = true
+        createButton.addTarget(self, action: #selector(create), for: .touchUpInside)
+        
+        searchButton.setImage(UIImage(named: "musimegane"), for: .normal)
+        searchButton.layer.cornerRadius = searchButton.frame.height / 2
+        searchButton.clipsToBounds = true
+        searchButton.addTarget(self, action: #selector(search), for: .touchUpInside)
+    }
+}
+
+// MARK: TableView Delegate
 
 extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -54,29 +112,18 @@ extension ChannelsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // ここで渡すのはuser情報ではなくchannel情報
-        navigationController?.pushViewController(ChatRoomViewController(id: presenter.channels[indexPath.row].id, name: presenter.channels[indexPath.row].name), animated: true)
+        let channel = presenter.channels[indexPath.row]
+        navigationController?.pushViewController(ChatRoomViewController(id: channel.id, name: channel.name, image: channel.image, members: channel.members), animated: true)
     }
     
 }
 
+// MARK: Protocol Delegate
+
 extension ChannelsViewController: ChannelViewControllerProtocol {
-    func showAlert() {
-        let alert = UIAlertController(title: "Lets Create Channel!!", message: "please enter your Channel Name.", preferredStyle: .alert)
-        
-        alert.addTextField(configurationHandler: nil)
-        
-        let action = UIAlertAction(title: "Create", style: .default) { [weak self] action in
-            guard let self = self else { return }
-            guard let textFields = alert.textFields else { return }
-            
-            if let text = textFields[0].text {
-                self.presenter.addUserDocument(channelName: text)
-            }
-        }
-        
-        alert.addAction(action)
-        present(alert, animated: true, completion: nil)
+    func showPopupView() {
+        // 画面遷移する
+        self.performSegue(withIdentifier: "navigateToCreate", sender: nil)
     }
     
     func reloadData() {

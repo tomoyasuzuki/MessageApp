@@ -8,18 +8,15 @@
 
 import UIKit
 import SnapKit
+import FirebaseFirestore
 
-class ChannelsTableViewCell: UITableViewCell {
+final class ChannelsTableViewCell: UITableViewCell {
     
     fileprivate lazy var channelImageView: UIImageView = {
         return UIImageView()
     }()
     
     fileprivate lazy var channelNameLabel: UILabel = {
-        return UILabel()
-    }()
-    
-    fileprivate lazy var latestMessageLabel: UILabel = {
         return UILabel()
     }()
     
@@ -32,13 +29,18 @@ class ChannelsTableViewCell: UITableViewCell {
         
         contentView.addSubview(channelImageView)
         contentView.addSubview(channelNameLabel)
-        contentView.addSubview(latestMessageLabel)
         
+        configueUIComponents()
         configureConstraints()
     }
 }
 
 extension ChannelsTableViewCell {
+    func configueUIComponents() {
+        channelImageView.layer.cornerRadius = channelImageView.frame.height / 2
+        channelImageView.clipsToBounds = true
+    }
+    
     func configureConstraints() {
         channelImageView.snp.makeConstraints { make in
             make.centerY.equalTo(contentView)
@@ -50,19 +52,10 @@ extension ChannelsTableViewCell {
             make.centerY.equalTo(channelImageView)
             make.left.equalTo(channelImageView.snp.right).offset(16)
         }
-        
-        latestMessageLabel.snp.makeConstraints { make in
-            make.top.equalTo(channelNameLabel.snp.bottom).offset(8)
-            make.left.equalTo(channelNameLabel)
-        }
     }
     
     func configureDataSource(channel: Channel) {
-        channelImageView.image = UIImage(named: "userIcon")
+        channelImageView.image = channel.image
         channelNameLabel.text = channel.name
-        // TODO: 最新のメッセージを取得できるようにする
-        // Channelオブジェクト自体が初期化時にoptionalのlatestMessageプロパティを持っている状態にする。
-        latestMessageLabel.text = "to be continue....."
     }
 }
-
